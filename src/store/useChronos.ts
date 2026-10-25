@@ -10,7 +10,8 @@ import type {
 } from '../../shared/schemas'
 import { erasFor } from '../data/eras'
 import { clampYear, formatYear } from '../lib/time'
-import { ApiRequestError, fetchKeyEvents, streamAlternateHistory } from '../api/client'
+import { ApiRequestError, STATIC_SITE, fetchKeyEvents, streamAlternateHistory } from '../api/client'
+import { readGeminiKey, writeGeminiKey } from '../lib/geminiKey'
 
 export type Phase = 'intro' | 'globe' | 'zone' | 'era' | 'events' | 'alternate'
 
@@ -60,6 +61,9 @@ interface ChronosState {
   /** A shared timeline loaded from the URL, opened from the title screen. */
   pendingShare: SharePayload | null
   shareError: string | null
+  /** Static site only: the visitor's own Gemini key (null = demo). */
+  geminiKey: string | null
+  keyDialogOpen: boolean
   setCountries: (countries: Country[]) => void
   enter: () => void
   hover: (index: number) => void
@@ -81,6 +85,8 @@ interface ChronosState {
   setComparing: (on: boolean) => void
   setPendingShare: (share: SharePayload | null) => void
   setShareError: (message: string | null) => void
+  setGeminiKey: (key: string | null) => void
+  setKeyDialogOpen: (open: boolean) => void
   /** One step back through the flow (Escape). */
   back: () => void
 }
@@ -140,6 +146,8 @@ export const useChronos = create<ChronosState>((set, get) => {
     comparing: false,
     pendingShare: null,
     shareError: null,
+    geminiKey: STATIC_SITE ? readGeminiKey() : null,
+    keyDialogOpen: false,
     setCountries: (countries) => set({ countries }),
     enter: () => {
       const share = get().pendingShare
@@ -182,7 +190,7 @@ export const useChronos = create<ChronosState>((set, get) => {
       const { selected, countries, year, keyEvents } = get()
       const country = countries[selected - 1]
       if (!country) return
-      const key = `${country.index}:${year}`
+      const key = `${country.index}:${year}:${STATIC_SITE && !get().geminiKey ? 'demo' : 'live'}`
       if (keyEvents.status !== 'idle' && keyEvents.status !== 'error' && keyEvents.key === key) return
 
       inFlight?.abort()
@@ -295,10 +303,22 @@ export const useChronos = create<ChronosState>((set, get) => {
     setComparing: (on) => set({ comparing: on }),
     setPendingShare: (share) => set({ pendingShare: share, shareError: null }),
     setShareError: (message) => set({ shareError: message }),
+    setGeminiKey: (key) => {
+      writeGeminiKey(key)
+      set({ geminiKey: key, keyDialogOpen: false })
+      // demo events on screen: fetch the real ones now that a key is set
+      const { keyEvents, phase } = get()
+      if (key && keyEvents.status === 'ready' && keyEvents.data.demo) {
+        set({ keyEvents: { status: 'idle' }, selectedEvent: null })
+        if (phase === 'events') void get().loadKeyEvents()
+      }
+    },
+    setKeyDialogOpen: (open) => set({ keyDialogOpen: open }),
     back: () => {
       const { phase, selectedEvent, selectedNode, fracturing, comparing, branches, activeBranch } = get()
       if (fracturing) return
       if (comparing) return set({ comparing: false })
+      if (get().keyDialogOpen) return set({ keyDialogOpen: false })
       if (phase === 'alternate') {
         const branch = findBranch(branches, activeBranch)
         if (selectedNode !== null) set({ selectedNode: null })

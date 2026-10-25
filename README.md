@@ -8,6 +8,8 @@ diverger de la ligne temporelle réelle.
 
 > Les chronologies alternatives générées sont **spéculatives** et ne constituent pas des faits historiques.
 
+**En ligne : https://lawl1et-1.github.io/chronos/**
+
 ## Parcours
 
 1. **Zone** — survolez et cliquez un pays sur le globe (ou cherchez-le), la caméra s'en approche.
@@ -107,8 +109,8 @@ server/          API Express (clé API côté serveur uniquement)
   prompts/       prompts système
   routes/        routes de l'API
   mock/          données de démonstration
-shared/          schémas Zod communs au client et au serveur
-src/api/         appels à l'API et cache local
+shared/          code commun au client et au serveur : schémas Zod, prompts, démo, appels Gemini
+src/api/         appels à l'API, cache local et moteur IA du navigateur (version statique)
 src/audio/       ambiance et effets sonores (Web Audio, sans fichiers)
 src/scene/       scène 3D : globe, nuages, atmosphère, étoiles, spirale, monolithes, caméra
 src/ui/          interface 2D par-dessus la scène
@@ -143,6 +145,25 @@ en surbrillance dans le shader du globe.
 - ✅ Partage d'une chronologie par URL
 - ✅ Mode comparaison réalité / alternative
 - ✅ Branches de branches (arbre 3D)
+
+## Version en ligne (GitHub Pages)
+
+GitHub Pages ne sert que des fichiers statiques : la version en ligne n'a donc pas de serveur.
+
+- **Sans clé**, elle fonctionne en mode démo (Allemagne, 1939).
+- **Avec une clé Gemini gratuite**, saisie par le visiteur (bouton « Mode démo »), l'IA est appelée
+  directement depuis le navigateur, avec les mêmes prompts, la même validation et le même streaming
+  que le serveur. La clé reste dans le navigateur du visiteur et n'est envoyée qu'à Google ;
+  aucune clé n'est intégrée au site.
+- **Les liens de partage** contiennent le scénario compressé dans l'URL (`#s=…`) au lieu d'être
+  stockés sur un serveur.
+
+Le déploiement est automatique à chaque push sur `main` (`.github/workflows/pages.yml`). Pour
+construire la version statique en local :
+
+```bash
+PAGES_BASE=/chronos/ VITE_STATIC=1 npm run build:pages
+```
 
 ## Offre gratuite Gemini
 

@@ -12,7 +12,7 @@ import { Countries } from './Countries'
 // start fetching everything in parallel instead of waterfalling behind Suspense
 loadCountries()
 for (const name of ['earth-day', 'earth-night', 'earth-water', 'clouds'])
-  useTexture.preload(`/textures/${name}-lo.webp`)
+  useTexture.preload(`${import.meta.env.BASE_URL}textures/${name}-lo.webp`)
 
 export function Globe() {
   const data = use(loadCountries())

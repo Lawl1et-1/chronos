@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import type { KeyEvent } from '../../shared/schemas'
 import { formatRange, formatYear } from '../lib/time'
 import { selectedCountry, useChronos } from '../store/useChronos'
+import { STATIC_SITE } from '../api/client'
 
 function ImpactBar({ score }: { score: number }) {
   return (
@@ -98,9 +99,18 @@ export function EventsPanel() {
                 {formatRange(data.period.start, data.period.end)}
               </p>
               {data.demo && (
-                <p className="mt-3 rounded-md border border-alt/40 px-3 py-2 text-xs text-alt">
-                  Mode démo : données d'exemple (Allemagne, 1939), sans appel à l'IA.
-                </p>
+                <div className="mt-3 rounded-md border border-alt/40 px-3 py-2 text-xs text-alt">
+                  <p>Mode démo : données d'exemple (Allemagne, 1939), sans appel à l'IA.</p>
+                  {STATIC_SITE && (
+                    <button
+                      type="button"
+                      onClick={() => useChronos.getState().setKeyDialogOpen(true)}
+                      className="mt-1.5 font-medium text-parchment underline underline-offset-2 hover:text-alt"
+                    >
+                      Ajouter une clé Gemini gratuite pour explorer cette zone →
+                    </button>
+                  )}
+                </div>
               )}
               <p className="mt-3 text-sm leading-relaxed text-parchment/75">{data.context}</p>
 

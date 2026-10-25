@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { betaZodOutputFormat } from '@anthropic-ai/sdk/helpers/beta/zod'
-import { LlmError, type JsonRequest, type JsonResult, type Provider } from './types'
+import { LlmError, type JsonRequest, type JsonResult, type Provider } from '../../shared/llm/types'
 
 type Effort = 'low' | 'medium' | 'high' | 'xhigh' | 'max'
 

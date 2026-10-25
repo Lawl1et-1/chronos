@@ -116,7 +116,7 @@ function buildIdMap(countries: Country[]) {
 }
 
 async function load(): Promise<CountryData> {
-  const topo = await fetch('/geo/countries-50m.json').then((r) => r.json())
+  const topo = await fetch(`${import.meta.env.BASE_URL}geo/countries-50m.json`).then((r) => r.json())
   const collection = feature(topo, topo.objects.countries) as unknown as { features: CountryFeature[] }
   if (collection.features.length > 254) throw new Error('Too many countries for an 8-bit ID map')
 

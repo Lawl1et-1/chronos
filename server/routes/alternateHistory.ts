@@ -1,18 +1,16 @@
 import type { Request, Response } from 'express'
-import { partialParse } from '@anthropic-ai/sdk/_vendor/partial-json-parser/parser'
 import { z } from 'zod'
 import {
   AlternateOutputSchema,
   AlternateRequestSchema,
   AlternateResultSchema,
-  TimelineNodeSchema,
-  type AlternatePartial,
   type AlternateResponse,
 } from '../../shared/schemas'
+import { completedParts, partialSignature } from '../../shared/partial'
 import { ResultCache } from '../cache'
 import { LlmError, providerId, streamStructured } from '../llm'
-import { DEMO_ALTERNATE, DEMO_SUB_BRANCH } from '../mock/alternateHistory'
-import { ALTERNATE_SYSTEM, alternatePrompt } from '../prompts/alternateHistory'
+import { DEMO_ALTERNATE, DEMO_SUB_BRANCH } from '../../shared/demo/alternateHistory'
+import { ALTERNATE_SYSTEM, alternatePrompt } from '../../shared/prompts/alternateHistory'
 
 const cache = new ResultCache<AlternateResponse>(100)
 
@@ -26,34 +24,6 @@ const sleep = (ms: number, signal: AbortSignal) =>
       reject(new Error('aborted'))
     })
   })
-
-/**
- * Keeps only the parts of the half-written JSON that are complete: an item counts
- * as finished once the model has moved on to the next one (or the next field).
- */
-export function completedParts(text: string): AlternatePartial | null {
-  let raw: Record<string, unknown>
-  try {
-    raw = partialParse(text) as Record<string, unknown>
-  } catch {
-    return null
-  }
-  if (!raw || typeof raw !== 'object') return null
-  const finished = <T>(items: unknown, closed: boolean) =>
-    Array.isArray(items) ? ((closed ? items : items.slice(0, -1)) as T[]) : []
-
-  const divergence = AlternateOutputSchema.shape.divergencePoint.safeParse(raw.divergencePoint)
-  const effects = finished<{ cause: string; effect: string }>(raw.butterflyEffects, 'timeline' in raw)
-  const timeline = finished<unknown>(raw.timeline, 'worldIn2025' in raw)
-    .map((n) => TimelineNodeSchema.safeParse(n))
-    .filter((r) => r.success)
-    .map((r) => r.data)
-  return {
-    divergencePoint: divergence.success && 'butterflyEffects' in raw ? divergence.data : undefined,
-    butterflyEffects: effects.length ? effects : undefined,
-    timeline,
-  }
-}
 
 /** Replays the demo scenario with delays, so the streaming UI can be tried without a key. */
 async function streamDemo(send: Send, signal: AbortSignal, demo: AlternateResponse) {
@@ -119,7 +89,7 @@ export async function alternateHistoryRoute(req: Request, res: Response) {
       onText: (snapshot) => {
         const partial = completedParts(snapshot)
         if (!partial) return
-        const next = `${partial.divergencePoint ? 1 : 0}|${partial.butterflyEffects?.length ?? 0}|${partial.timeline.length}`
+        const next = partialSignature(partial)
         if (next === signature) return
         signature = next
         send('partial', partial)

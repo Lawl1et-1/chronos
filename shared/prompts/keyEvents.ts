@@ -1,4 +1,4 @@
-import type { KeyEventsRequest } from '../../shared/schemas'
+import type { KeyEventsRequest } from '../schemas'
 
 export const KEY_EVENTS_SYSTEM = `Tu es un historien rigoureux. Tu réponds en français, dans un registre précis et sobre.
 

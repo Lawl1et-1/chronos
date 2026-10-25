@@ -1,4 +1,4 @@
-import type { KeyEventsResponse } from '../../shared/schemas'
+import type { KeyEventsResponse } from '../schemas'
 
 /**
  * Demo data (CHRONOS_MOCK=1) so the interface can be developed without an API key.

@@ -42,19 +42,20 @@ function jsonSchema(output: z.ZodType) {
   return schema
 }
 
-export function geminiProvider(): Provider {
-  const apiKey = process.env.GEMINI_API_KEY
-  if (!apiKey) throw new LlmError('Clé API absente : renseignez GEMINI_API_KEY dans .env.', 'missing_key', 503)
-  const models = [
-    process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite',
-    ...(process.env.GEMINI_FALLBACK_MODELS ?? 'gemini-3.6-flash,gemini-3.8-flash')
-      .split(',')
-      .map((m) => m.trim())
-      .filter(Boolean),
-  ]
+export const DEFAULT_GEMINI_MODELS = ['gemini-3.5-flash-lite', 'gemini-3.6-flash', 'gemini-3.8-flash']
+
+export interface GeminiOptions {
+  apiKey: string
+  /** Main model first, then the fallbacks. */
+  models?: string[]
+  /** Free-tier models can queue for minutes when busy: past this, hand over to the next one. */
+  timeoutMs?: number
+}
+
+/** Works both on the server and in the browser (the visitor's own key on the static site). */
+export function geminiProvider({ apiKey, models = DEFAULT_GEMINI_MODELS, timeoutMs = 90_000 }: GeminiOptions): Provider {
+  if (!apiKey) throw new LlmError('Clé API Gemini absente.', 'missing_key', 503)
   const ai = new GoogleGenAI({ apiKey })
-  // free-tier models can queue for minutes when busy: past this, hand over to the next one
-  const timeoutMs = Number(process.env.GEMINI_TIMEOUT_MS ?? 90_000)
 
   const config = (req: JsonRequest, signal: AbortSignal) => ({
     systemInstruction: req.system,

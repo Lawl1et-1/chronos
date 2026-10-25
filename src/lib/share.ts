@@ -32,11 +32,3 @@ export function buildSharePayload(): SharePayload | null {
   const checked = SharePayloadSchema.safeParse(payload)
   return checked.success ? checked.data : null
 }
-
-export const shareUrl = (id: string) => `${location.origin}${location.pathname}?s=${encodeURIComponent(id)}`
-
-/** Id from the current URL (?s=…), if any. */
-export function sharedIdFromUrl() {
-  const id = new URLSearchParams(location.search).get('s')
-  return id && /^[A-Za-z0-9_-]{6,32}$/.test(id) ? id : null
-}

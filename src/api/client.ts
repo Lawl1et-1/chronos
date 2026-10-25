@@ -13,8 +13,33 @@ import {
   type KeyEventsResponse,
   type SharePayload,
 } from '../../shared/schemas'
+import { readGeminiKey } from '../lib/geminiKey'
+import { decodeShare, encodeShare } from '../lib/shareCodec'
 
 const CACHE_PREFIX = 'chronos:v1:'
+
+/**
+ * Static build (GitHub Pages): no server, the AI runs from the browser with the
+ * visitor's own key (or the demo), and shared scenarios travel inside the link.
+ */
+export const STATIC_SITE = import.meta.env.VITE_STATIC === '1'
+
+type Engine = typeof import('./browserEngine')
+
+/**
+ * Runs an in-browser engine call (loaded on demand, so the server build never ships
+ * the SDK), turning its errors into the same errors as the API.
+ */
+async function local<T>(run: (engine: Engine) => Promise<T>): Promise<T> {
+  const engine = await import('./browserEngine')
+  try {
+    return await run(engine)
+  } catch (error) {
+    if ((error as Error).name === 'AbortError') throw error
+    if (error instanceof engine.LlmError) throw new ApiRequestError(error.message, error.code)
+    throw new ApiRequestError("Le service d'IA est injoignable.", 'network')
+  }
+}
 
 export class ApiRequestError extends Error {
   constructor(
@@ -91,6 +116,12 @@ export async function streamAlternateHistory(
   const cached = readCache(key, AlternateResponseSchema)
   if (cached) return cached
 
+  if (STATIC_SITE) {
+    const data = await local((e) => e.alternateHistory(req, readGeminiKey(), { onPartial, onReset, signal }))
+    if (!data.demo) writeCache(key, data)
+    return data
+  }
+
   let res: Response
   try {
     res = await fetch('/api/alternate-history', {
@@ -141,13 +172,24 @@ export async function streamAlternateHistory(
   throw new ApiRequestError('La connexion a été interrompue avant la fin.', 'interrupted')
 }
 
-/** Stores a finished scenario on the server and returns its short id. */
-export async function createShare(payload: SharePayload): Promise<string> {
+/** A link that reopens this scenario: stored on the server, or packed into the URL hash on the static site. */
+export async function createShareLink(payload: SharePayload): Promise<string> {
+  const page = `${location.origin}${location.pathname}`
+  if (STATIC_SITE) return `${page}#s=${await encodeShare(payload)}`
   const { id } = await postJson('/api/share', payload, ShareCreatedSchema)
-  return id
+  return `${page}?s=${encodeURIComponent(id)}`
 }
 
-export async function fetchShare(id: string): Promise<SharePayload> {
+/** The shared scenario referenced by the current URL, if any. */
+export function sharedFromUrl(): Promise<SharePayload> | null {
+  const packed = new URLSearchParams(location.hash.slice(1)).get('s')
+  if (packed) return decodeShare(packed)
+  const id = new URLSearchParams(location.search).get('s')
+  if (id && !STATIC_SITE && /^[A-Za-z0-9_-]{6,32}$/.test(id)) return fetchShare(id)
+  return null
+}
+
+async function fetchShare(id: string): Promise<SharePayload> {
   let res: Response
   try {
     res = await fetch(`/api/share/${encodeURIComponent(id)}`)
@@ -168,7 +210,9 @@ export async function fetchKeyEvents(req: KeyEventsRequest, signal?: AbortSignal
   const key = `key-events:${req.zone.iso ?? req.zone.name}:${req.year}`
   const cached = readCache(key, KeyEventsResponseSchema)
   if (cached) return cached
-  const data = await postJson('/api/key-events', req, KeyEventsResponseSchema, signal)
+  const data = STATIC_SITE
+    ? await local((e) => e.keyEvents(req, readGeminiKey(), signal))
+    : await postJson('/api/key-events', req, KeyEventsResponseSchema, signal)
   // demo data is not worth keeping: it would mask real results later
   if (!data.demo) writeCache(key, data)
   return data

@@ -1,4 +1,4 @@
-import type { AlternateRequest } from '../../shared/schemas'
+import type { AlternateRequest } from '../schemas'
 
 export const ALTERNATE_SYSTEM = `Tu es un historien spécialiste de l'histoire contrefactuelle. Tu réponds en français, dans un registre analytique, sobre et non sensationnaliste.
 

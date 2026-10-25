@@ -1,4 +1,4 @@
-import type { AlternateResponse } from '../../shared/schemas'
+import type { AlternateResponse } from '../schemas'
 
 /**
  * Demo scenario (CHRONOS_MOCK=1) for the "Invasion de la Pologne" demo event.

@@ -6,7 +6,7 @@ import { useTexture } from '@react-three/drei'
 /** Suspends on a small texture, then swaps in the full-resolution one in the background. */
 export function useProgressiveTexture(name: string, srgb = true) {
   const gl = useThree((s) => s.gl)
-  const lo = useTexture(`/textures/${name}-lo.webp`)
+  const lo = useTexture(`${import.meta.env.BASE_URL}textures/${name}-lo.webp`)
   const [texture, setTexture] = useState<THREE.Texture>(lo)
 
   useEffect(() => {
@@ -17,7 +17,7 @@ export function useProgressiveTexture(name: string, srgb = true) {
     }
     configure(lo)
     let alive = true
-    new THREE.TextureLoader().load(`/textures/${name}.webp`, (hi) => {
+    new THREE.TextureLoader().load(`${import.meta.env.BASE_URL}textures/${name}.webp`, (hi) => {
       if (!alive) return hi.dispose()
       configure(hi)
       setTexture(hi)

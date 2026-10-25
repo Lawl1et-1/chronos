@@ -8,8 +8,8 @@ import {
 } from '../../shared/schemas'
 import { ResultCache } from '../cache'
 import { generateStructured, LlmError, providerId } from '../llm'
-import { DEMO_KEY_EVENTS } from '../mock/keyEvents'
-import { KEY_EVENTS_SYSTEM, keyEventsPrompt } from '../prompts/keyEvents'
+import { DEMO_KEY_EVENTS } from '../../shared/demo/keyEvents'
+import { KEY_EVENTS_SYSTEM, keyEventsPrompt } from '../../shared/prompts/keyEvents'
 
 const cache = new ResultCache<KeyEventsResponse>()
 

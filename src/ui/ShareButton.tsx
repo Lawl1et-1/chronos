@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { ApiRequestError, createShare } from '../api/client'
-import { buildSharePayload, shareUrl } from '../lib/share'
+import { ApiRequestError, createShareLink } from '../api/client'
+import { buildSharePayload } from '../lib/share'
 
 type State = { kind: 'idle' } | { kind: 'busy' } | { kind: 'done'; url: string; copied: boolean } | { kind: 'error'; message: string }
 
@@ -15,7 +15,7 @@ export function ShareButton({ className = '' }: { className?: string }) {
     }
     setState({ kind: 'busy' })
     try {
-      const url = shareUrl(await createShare(payload))
+      const url = await createShareLink(payload)
       let copied = false
       try {
         await navigator.clipboard.writeText(url)
