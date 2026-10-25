@@ -6,13 +6,16 @@ import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
 import { latLonToVector3 } from '../lib/geo'
 import { selectedCountry, useChronos } from '../store/useChronos'
 import { sunDir } from './sun'
+import { prefersReducedMotion } from './fx'
 import { eventsDistance, zoneDistance } from './framing'
 import { branchCamera, branchFrame } from './branchLayout'
 
 const DIST_INTRO = 4.8
 const DIST_GLOBE = 3.3
 const DIST_ERA = 5.3
-const FLIGHT_SECONDS = 2.1
+// shorter, calmer moves when the system asks for reduced motion
+const REDUCED = prefersReducedMotion()
+const FLIGHT_SECONDS = REDUCED ? 0.7 : 2.1
 
 interface Flight {
   fromDir: THREE.Vector3
@@ -76,14 +79,15 @@ export function CameraRig() {
       const angle = f.fromDir.angleTo(f.toDir)
       tmp.copy(f.fromDir).applyQuaternion(identity.clone().slerp(q, e))
       // pull back mid-flight on long arcs, like a real camera move
-      const dist = THREE.MathUtils.lerp(f.fromDist, f.toDist, e) + Math.sin(Math.PI * e) * angle * 0.35
+      const arc = REDUCED ? 0 : Math.sin(Math.PI * e) * angle * 0.35
+      const dist = THREE.MathUtils.lerp(f.fromDist, f.toDist, e) + arc
       camera.position.copy(tmp.multiplyScalar(dist))
       camera.lookAt(0, 0, 0)
       if (f.t >= 1) flight.current = null
     }
     if (c) {
       c.enabled = !flight.current && phase !== 'intro'
-      c.autoRotate = !flight.current && (phase === 'intro' || phase === 'globe')
+      c.autoRotate = !REDUCED && !flight.current && (phase === 'intro' || phase === 'globe')
       c.autoRotateSpeed = phase === 'intro' ? 0.35 : 0.22
       c.update()
     }

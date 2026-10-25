@@ -9,7 +9,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "textures": "node scripts/textures.mjs"
+    "textures": "node scripts/textures.mjs",
+    "start": "npm run build && tsx server/index.ts --static"
   },
   "repository": {
     "type": "git",

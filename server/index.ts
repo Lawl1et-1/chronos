@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs'
+import { resolve } from 'node:path'
 import express from 'express'
 import { keyEventsRoute } from './routes/keyEvents'
 import { alternateHistoryRoute } from './routes/alternateHistory'
@@ -22,6 +24,13 @@ app.get('/api/health', (_req, res) => {
 
 app.post('/api/key-events', keyEventsRoute)
 app.post('/api/alternate-history', alternateHistoryRoute)
+
+// `npm start`: serve the production build from the same server
+const dist = resolve('dist')
+if (process.argv.includes('--static') && existsSync(dist)) {
+  app.use(express.static(dist, { maxAge: '7d', index: false }))
+  app.get(/^(?!\/api\/).*/, (_req, res) => res.sendFile(resolve(dist, 'index.html')))
+}
 
 const port = Number(process.env.API_PORT ?? 8787)
 app.listen(port, () => console.log(`[chronos] api listening on http://localhost:${port}`))

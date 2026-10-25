@@ -8,6 +8,17 @@ diverger de la ligne temporelle réelle.
 
 > Les chronologies alternatives générées sont **spéculatives** et ne constituent pas des faits historiques.
 
+## Parcours
+
+1. **Zone** — survolez et cliquez un pays sur le globe (ou cherchez-le), la caméra s'en approche.
+2. **Époque** — une spirale du temps entoure le globe : époques suggérées, curseur ou année exacte.
+3. **Événements** — l'IA sélectionne les 5 événements déterminants, affichés en monolithes holographiques.
+4. **Divergence** — choisissez une modification (proposée ou libre) : le monolithe se brise, la caméra
+   recule et la branche alternative se sépare de la ligne réelle, jalon par jalon.
+
+`Échap` revient d'une étape à tout moment. Le son (ambiance et effets, synthétisés dans le navigateur)
+est désactivé par défaut : bouton haut-parleur dans un coin de l’écran.
+
 ## Stack
 
 - Vite + React + TypeScript
@@ -24,6 +35,8 @@ cp .env.example .env   # renseigner ANTHROPIC_API_KEY et ANTHROPIC_MODEL
 npm run dev
 ```
 
+Pour essayer sans clé API, mettez `CHRONOS_MOCK=1` dans `.env`.
+
 - Front : http://localhost:5173
 - API : http://localhost:8787 (proxifiée sous `/api` par Vite, `API_PORT` pour changer le port)
 
@@ -31,6 +44,7 @@ npm run dev
 | --- | --- |
 | `npm run dev` | front + API en parallèle |
 | `npm run build` | vérification TypeScript + build de production |
+| `npm start` | build puis serveur unique (front + API) sur `API_PORT` |
 | `npm run textures` | régénère les textures webp de `public/textures` |
 
 ### Variables d'environnement
@@ -73,6 +87,7 @@ server/          API Express (clé API côté serveur uniquement)
   mock/          données de démonstration
 shared/          schémas Zod communs au client et au serveur
 src/api/         appels à l'API et cache local
+src/audio/       ambiance et effets sonores (Web Audio, sans fichiers)
 src/scene/       scène 3D : globe, nuages, atmosphère, étoiles, spirale, monolithes, caméra
 src/ui/          interface 2D par-dessus la scène
 src/lib/         géographie, chargement des pays et carte d'index
@@ -80,6 +95,14 @@ src/data/        époques suggérées par pays (et par région en repli)
 src/store/       état global (Zustand)
 public/          textures et frontières (TopoJSON)
 ```
+
+## Rendu et performances
+
+- Une seule passe pour toutes les frontières, un seul nuage de points pour les étoiles et les éclats.
+- Textures compressées en webp, chargées en basse résolution puis remplacées par la haute résolution.
+- La résolution de rendu s'adapte à la machine (baisse si le framerate chute, remonte ensuite).
+- `prefers-reduced-motion` est respecté : déplacements de caméra courts, sans rotation automatique ni
+  effets de transition.
 
 Les pays sont rendus dans une carte d'index équirectangulaire (un octet par pixel) :
 elle sert à la fois au survol/clic (lecture directe au point UV touché) et à la mise
@@ -91,7 +114,7 @@ en surbrillance dans le shader du globe.
 2. ✅ Timeline + époques
 3. ✅ Événements clés + monolithes
 4. ✅ Histoire alternative + branche
-5. Polish visuel et transitions
+5. ✅ Polish visuel et transitions
 
 ## Crédits
 
