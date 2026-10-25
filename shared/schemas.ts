@@ -70,5 +70,83 @@ export const KeyEventsResponseSchema = KeyEventsResultSchema.extend({
 })
 export type KeyEventsResponse = z.infer<typeof KeyEventsResponseSchema>
 
-export const ApiErrorSchema = z.object({ error: z.string(), code: z.string() })
+// ---------------------------------------------------------------------------
+// Call 2: alternate history
+
+export const AlterationSchema = z.object({
+  title: z.string().min(3).max(300),
+  description: z.string().max(600),
+})
+export type Alteration = z.infer<typeof AlterationSchema>
+
+export const AlternateRequestSchema = z.object({
+  zone: ZoneSchema,
+  year: z.number().int().min(-3000).max(2020),
+  event: z.object({
+    id: z.string().max(80),
+    title: z.string().max(200),
+    date: z.string().max(80),
+    year: z.number().int(),
+    summary: z.string().max(800),
+  }),
+  alteration: AlterationSchema,
+})
+export type AlternateRequest = z.infer<typeof AlternateRequestSchema>
+
+const Region = z.object({
+  name: z.string(),
+  iso: z.string().nullable().describe('Code ISO 3166-1 numérique à 3 chiffres du pays actuel, ou null'),
+})
+
+const TimelineNode = z.object({
+  year: z.number().int(),
+  title: z.string(),
+  description: z.string(),
+  realHistoryComparison: z.string(),
+  confidence: z.number().describe('Confiance entre 0 et 1, décroissante avec le temps'),
+  affectedRegions: z.array(Region),
+})
+
+/** Field order matters: the model writes them in this order, so the timeline streams before the epilogue. */
+export const AlternateOutputSchema = z.object({
+  divergencePoint: z.object({ year: z.number().int(), title: z.string(), description: z.string() }),
+  butterflyEffects: z.array(z.object({ cause: z.string(), effect: z.string() })).describe('3 à 6 maillons'),
+  timeline: z.array(TimelineNode).describe('8 à 12 jalons, par ordre chronologique'),
+  worldIn2025: z.string(),
+  plausibilityNote: z.string(),
+})
+
+export const TimelineNodeSchema = TimelineNode.extend({
+  title: z.string().min(3).max(140),
+  confidence: z.number().min(0).max(1),
+  affectedRegions: z.array(Region.extend({ iso: z.string().regex(/^\d{3}$/).nullable() })).max(12),
+})
+export type TimelineNode = z.infer<typeof TimelineNodeSchema>
+
+export const AlternateResultSchema = AlternateOutputSchema.extend({
+  butterflyEffects: z.array(z.object({ cause: z.string(), effect: z.string() })).min(3).max(6),
+  timeline: z
+    .array(TimelineNodeSchema)
+    .min(8)
+    .max(12)
+    .refine((t) => t.every((n, i) => i === 0 || n.year >= t[i - 1].year), 'Les jalons doivent être chronologiques')
+    .refine((t) => t[t.length - 1].year <= 2025, 'Aucun jalon après 2025')
+    .refine((t) => t[t.length - 1].confidence <= t[0].confidence, 'La confiance doit baisser avec le temps'),
+})
+export type AlternateResult = z.infer<typeof AlternateResultSchema>
+
+export const AlternateResponseSchema = AlternateResultSchema.extend({
+  demo: z.boolean(),
+})
+export type AlternateResponse = z.infer<typeof AlternateResponseSchema>
+
+/** What the server streams while the model is still writing. */
+export const AlternatePartialSchema = z.object({
+  divergencePoint: AlternateOutputSchema.shape.divergencePoint.optional(),
+  butterflyEffects: z.array(z.object({ cause: z.string(), effect: z.string() })).optional(),
+  timeline: z.array(TimelineNodeSchema),
+})
+export type AlternatePartial = z.infer<typeof AlternatePartialSchema>
+
+export const ApiErrorSchema =z.object({ error: z.string(), code: z.string() })
 export type ApiError = z.infer<typeof ApiErrorSchema>

@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
 import { Html } from '@react-three/drei'
 import { erasFor } from '../data/eras'
-import { latLonToVector3 } from '../lib/geo'
+import { hiddenByGlobe, latLonToVector3 } from '../lib/geo'
 import { formatYear, helixAngle, helixPoint, tToYear, yearToT } from '../lib/time'
 import { selectedCountry, useChronos } from '../store/useChronos'
 import { spiralFragment, spiralVertex } from './shaders/spiral'
@@ -24,23 +24,11 @@ class HelixCurve extends THREE.Curve<THREE.Vector3> {
 }
 
 const noRaycast = () => null
+/** 3D labels must never swallow clicks meant for the scene. */
+const CLICK_THROUGH = { pointerEvents: 'none' as const }
 const tmp = new THREE.Vector3()
 const camDir = new THREE.Vector3()
-const toPoint = new THREE.Vector3()
 const mid = new THREE.Vector3()
-
-/** True if the segment camera → point passes through the globe. */
-function hiddenByGlobe(camera: THREE.Vector3, point: THREE.Vector3) {
-  toPoint.subVectors(point, camera)
-  const len = toPoint.length()
-  toPoint.divideScalar(len)
-  const b = camera.dot(toPoint)
-  const c = camera.lengthSq() - 1
-  const disc = b * b - c
-  if (disc < 0) return false
-  const hit = -b - Math.sqrt(disc)
-  return hit > 0 && hit < len
-}
 
 /** Centuries as small radial ticks, millennia longer. */
 function buildTicks() {
@@ -223,7 +211,7 @@ export function TimeSpiral() {
                 <sphereGeometry args={[0.022, 16, 12]} />
                 <meshBasicMaterial color={current ? '#ffcf7a' : '#dfe9f5'} toneMapped={false} />
               </mesh>
-              <Html position={[0, 0.07, 0]} center zIndexRange={[10, 0]}>
+              <Html position={[0, 0.07, 0]} center zIndexRange={[10, 0]} style={CLICK_THROUGH}>
                 <div
                   ref={label(i)}
                   data-t={t}
@@ -242,7 +230,7 @@ export function TimeSpiral() {
         {TICK_YEARS.map((y, j) => {
           const t = yearToT(y)
           return (
-            <Html key={y} position={helixPoint(t).add(TICK_LABEL_OFFSET)} center zIndexRange={[5, 0]}>
+            <Html key={y} position={helixPoint(t).add(TICK_LABEL_OFFSET)} center zIndexRange={[5, 0]} style={CLICK_THROUGH}>
               <div
                 ref={label(eras.length + j)}
                 data-t={t}

@@ -1,5 +1,6 @@
 import express from 'express'
 import { keyEventsRoute } from './routes/keyEvents'
+import { alternateHistoryRoute } from './routes/alternateHistory'
 
 try {
   process.loadEnvFile()
@@ -20,6 +21,7 @@ app.get('/api/health', (_req, res) => {
 })
 
 app.post('/api/key-events', keyEventsRoute)
+app.post('/api/alternate-history', alternateHistoryRoute)
 
 const port = Number(process.env.API_PORT ?? 8787)
 app.listen(port, () => console.log(`[chronos] api listening on http://localhost:${port}`))

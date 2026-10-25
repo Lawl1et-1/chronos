@@ -3,9 +3,10 @@ import * as THREE from 'three'
 import { useFrame, useThree } from '@react-three/fiber'
 import type { KeyEvent } from '../../shared/schemas'
 import { latLonToVector3 } from '../lib/geo'
-import { selectedCountry, useChronos } from '../store/useChronos'
+import { FRACTURE_MS, selectedCountry, useChronos } from '../store/useChronos'
 import { CARD_ASPECT, drawEventCard, drawPlaceholderCard, makeCardTexture } from './cardTexture'
 import { eventsDistance } from './framing'
+import { createFracture } from './fracture'
 import { monolithFragment, monolithVertex } from './shaders/monolith'
 
 const COUNT = 5
@@ -33,8 +34,10 @@ export function Monoliths() {
   const keyEvents = useChronos((s) => s.keyEvents)
   const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera
   const size = useThree((s) => s.size)
+  const gl = useThree((s) => s.gl)
+  const fracturing = useChronos((s) => s.fracturing)
 
-  const active = phase === 'events'
+  const active = phase === 'events' && !fracturing
   const events: (KeyEvent | null)[] =
     keyEvents.status === 'ready'
       ? keyEvents.data.events
@@ -136,6 +139,27 @@ export function Monoliths() {
   const anim = useRef(Array.from({ length: COUNT }, () => ({ appear: 0, hover: 0, delay: 0 })))
   const lastKey = useRef('')
 
+  const fracture = useMemo(() => createFracture(FRACTURE_MS / 1000 + 0.8), [])
+  useEffect(() => () => fracture.dispose(), [fracture])
+
+  // the chosen card shatters; the others fade out with the same "active" switch
+  useEffect(() => {
+    if (!fracturing || !layout) return
+    const { selectedEvent } = useChronos.getState()
+    const i = events.findIndex((e) => e?.id === selectedEvent)
+    const mesh = meshes.current[i]
+    if (i < 0 || !mesh) return
+    fracture.burst(
+      cards[i].canvas,
+      mesh,
+      camera,
+      layout.cardW * (1 + anim.current[i].hover * 0.06),
+      size.height,
+      gl.getPixelRatio(),
+    )
+    anim.current[i].appear = 0
+  }, [fracturing])
+
   const beams = useMemo(() => {
     const g = new THREE.BufferGeometry()
     g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(COUNT * 6), 3))
@@ -159,6 +183,7 @@ export function Monoliths() {
   }, [])
 
   useFrame(({ clock }, dt) => {
+    fracture.update(dt)
     const g = group.current
     if (!g || !layout) return
     const { hoveredEvent, selectedEvent } = useChronos.getState()
@@ -212,7 +237,10 @@ export function Monoliths() {
       // beam from the card down to where the event happened
       if (event) {
         latLonToVector3(event.coordinates.lat, event.coordinates.lon, 1.002, ground)
-        bottom.set(0, -0.5 * layout.cardH, 0).applyQuaternion(camera.quaternion).add(mesh.position)
+        bottom
+          .set(0, -0.5 * layout.cardH, 0)
+          .applyQuaternion(camera.quaternion)
+          .add(mesh.position)
         pos.setXYZ(i * 2, bottom.x, bottom.y, bottom.z)
         pos.setXYZ(i * 2 + 1, ground.x, ground.y, ground.z)
         matrix.makeScale(
@@ -242,44 +270,46 @@ export function Monoliths() {
   const setCursor = (c: string) => (document.body.style.cursor = c)
 
   return (
-    <group ref={group} visible={false}>
-      {cards.map((card, i) => {
-        const event = events[i]
-        return (
-          <mesh
-            key={i}
-            ref={(m) => {
-              meshes.current[i] = m
-            }}
-            material={card.material}
-            renderOrder={10}
-            visible={false}
-            raycast={event ? THREE.Mesh.prototype.raycast : noRaycast}
-            onPointerOver={(e) => {
-              if (!event || !active) return
-              e.stopPropagation()
-              useChronos.getState().hoverEvent(event.id)
-              setCursor('pointer')
-            }}
-            onPointerOut={() => {
-              if (!event) return
-              if (useChronos.getState().hoveredEvent === event.id) useChronos.getState().hoverEvent(null)
-              setCursor('')
-            }}
-            onClick={(e) => {
-              if (!event || !active || e.delta > 6) return
-              e.stopPropagation()
-              const { selectedEvent, selectEvent } = useChronos.getState()
-              selectEvent(selectedEvent === event.id ? null : event.id)
-            }}
-          >
-            <planeGeometry args={[1, 1]} />
-          </mesh>
-        )
-      })}
-      <primitive object={beams} raycast={noRaycast} />
-      <primitive object={markers} raycast={noRaycast} />
-    </group>
+    <>
+      <group ref={group} visible={false}>
+        {cards.map((card, i) => {
+          const event = events[i]
+          return (
+            <mesh
+              key={i}
+              ref={(m) => {
+                meshes.current[i] = m
+              }}
+              material={card.material}
+              renderOrder={10}
+              visible={false}
+              raycast={event ? THREE.Mesh.prototype.raycast : noRaycast}
+              onPointerOver={(e) => {
+                if (!event || !active) return
+                e.stopPropagation()
+                useChronos.getState().hoverEvent(event.id)
+                setCursor('pointer')
+              }}
+              onPointerOut={() => {
+                if (!event) return
+                if (useChronos.getState().hoveredEvent === event.id) useChronos.getState().hoverEvent(null)
+                setCursor('')
+              }}
+              onClick={(e) => {
+                if (!event || !active || e.delta > 6) return
+                e.stopPropagation()
+                const { selectedEvent, selectEvent } = useChronos.getState()
+                selectEvent(selectedEvent === event.id ? null : event.id)
+              }}
+            >
+              <planeGeometry args={[1, 1]} />
+            </mesh>
+          )
+        })}
+        <primitive object={beams} raycast={noRaycast} />
+        <primitive object={markers} raycast={noRaycast} />
+      </group>
+      <primitive object={fracture.points} />
+    </>
   )
 }
-

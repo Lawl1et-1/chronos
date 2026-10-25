@@ -7,6 +7,7 @@ import { latLonToVector3 } from '../lib/geo'
 import { selectedCountry, useChronos } from '../store/useChronos'
 import { sunDir } from './sun'
 import { eventsDistance, zoneDistance } from './framing'
+import { branchCamera, branchFrame } from './branchLayout'
 
 const DIST_INTRO = 4.8
 const DIST_GLOBE = 3.3
@@ -55,6 +56,13 @@ export function CameraRig() {
       const halfWidth = Math.tan(THREE.MathUtils.degToRad(cam.fov / 2)) * (size.width / size.height)
       toDist = THREE.MathUtils.clamp(1.95 / halfWidth, DIST_ERA, 9)
     }
+    if (phase === 'alternate' && target) {
+      // pull back to show the real line and the branch side by side
+      const cam = camera as THREE.PerspectiveCamera
+      const view = branchCamera(branchFrame(target), cam.fov, size.width / size.height)
+      toDir = view.dir
+      toDist = view.dist
+    }
     flight.current = { fromDir, toDir, fromDist, toDist, t: 0 }
   }, [phase, target, camera, size])
 
@@ -83,9 +91,9 @@ export function CameraRig() {
     // (right of the screen on desktop, bottom on mobile)
     const { width, height } = size
     const wide = width >= 640
-    const panel = phase === 'era' || phase === 'events'
+    const panel = phase === 'era' || phase === 'events' || phase === 'alternate'
     const shiftX = phase === 'zone' ? Math.min(200, width * 0.16) : panel ? Math.min(250, width * 0.19) : 0
-    const shiftY = phase === 'zone' ? height * 0.18 : phase === 'era' ? height * 0.24 : phase === 'events' ? height * 0.15 : 0
+    const shiftY = phase === 'zone' ? height * 0.18 : phase === 'era' ? height * 0.24 : phase === 'events' ? height * 0.15 : phase === 'alternate' ? height * 0.22 : 0
     offset.x = THREE.MathUtils.damp(offset.x, wide ? shiftX : 0, 3, dt)
     offset.y = THREE.MathUtils.damp(offset.y, wide ? 0 : shiftY, 3, dt)
     const cam = camera as THREE.PerspectiveCamera

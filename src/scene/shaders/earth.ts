@@ -17,6 +17,8 @@ uniform sampler2D dayMap;
 uniform sampler2D nightMap;
 uniform sampler2D waterMap;
 uniform sampler2D idMap;
+uniform sampler2D regionMap;
+uniform vec3 regionColor;
 uniform vec3 sunDir;
 uniform float hovered;
 uniform float selected;
@@ -57,6 +59,10 @@ void main() {
   col *= mix(1.0, 0.45, focus * (1.0 - isSel));
   col = mix(col, col * 0.75 + vec3(0.3, 0.75, 1.0) * 0.32, isHover * (1.0 - isSel));
   col += vec3(1.0, 0.72, 0.32) * isSel * (0.1 + 0.05 * sin(time * 2.2));
+
+  // countries touched by the alternate timeline (weight per country index)
+  float region = texture2D(regionMap, vec2((id + 0.5) / 256.0, 0.5)).r * land;
+  col = mix(col, col * 0.55 + regionColor * (0.28 + 0.06 * sin(time * 1.6)), region);
 
   gl_FragColor = vec4(col, 1.0);
   #include <tonemapping_fragment>

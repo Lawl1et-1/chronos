@@ -8,6 +8,7 @@ import { Starfield } from './Starfield'
 import { CameraRig } from './CameraRig'
 import { TimeSpiral } from './TimeSpiral'
 import { Monoliths } from './Monoliths'
+import { TimelineBranch } from './TimelineBranch'
 
 export function Experience() {
   return (
@@ -15,6 +16,10 @@ export function Experience() {
       camera={{ position: [0, 1.1, 4.8], fov: 42, near: 0.01, far: 300 }}
       dpr={[1, 2]}
       gl={{ antialias: false, powerPreference: 'high-performance' }}
+      onCreated={(state) => {
+        // handle for debugging in the browser console during development
+        if (import.meta.env.DEV) Object.assign(window, { __r3f: state })
+      }}
     >
       <color attach="background" args={['#020308']} />
       <Starfield />
@@ -24,6 +29,7 @@ export function Experience() {
         <Atmosphere />
         <TimeSpiral />
         <Monoliths />
+        <TimelineBranch />
       </Suspense>
       <CameraRig />
       <EffectComposer multisampling={4}>

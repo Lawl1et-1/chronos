@@ -6,7 +6,7 @@ const STEPS = ['Zone', 'Époque', 'Événements', 'Divergence']
 export function Hud() {
   const phase = useChronos((s) => s.phase)
   if (phase === 'intro') return null
-  const current = phase === 'events' ? 2 : phase === 'era' ? 1 : 0
+  const current = phase === 'alternate' ? 3 : phase === 'events' ? 2 : phase === 'era' ? 1 : 0
 
   return (
     <>
@@ -28,10 +28,10 @@ export function Hud() {
       </motion.header>
 
       <AnimatePresence>
-        {(phase === 'globe' || phase === 'era' || phase === 'events') && (
+        {phase !== 'zone' && (
           <motion.p
             key={phase}
-            className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 px-4 text-center font-mono text-[11px] tracking-[0.2em] text-dust uppercase"
+            className={`pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 px-4 text-center font-mono text-[11px] tracking-[0.2em] text-dust uppercase ${phase === 'globe' ? '' : 'hidden sm:block'}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -41,7 +41,9 @@ export function Hud() {
               ? 'Faites tourner le globe · survolez un pays · cliquez pour le choisir'
               : phase === 'era'
                 ? 'Cliquez sur la spirale ou sur un repère pour choisir une année'
-                : 'Survolez un monolithe pour le rapprocher · cliquez pour le détail'}
+                : phase === 'events'
+                  ? 'Survolez un monolithe pour le rapprocher · cliquez pour le détail'
+                  : 'Cliquez sur un jalon doré pour comparer avec la réalité'}
           </motion.p>
         )}
       </AnimatePresence>

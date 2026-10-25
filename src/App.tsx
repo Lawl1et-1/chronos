@@ -3,6 +3,7 @@ import { Experience } from './scene/Experience'
 import { useChronos } from './store/useChronos'
 import { EraPanel } from './ui/EraPanel'
 import { EventsPanel } from './ui/EventsPanel'
+import { AlternatePanel } from './ui/AlternatePanel'
 import { EventTooltip } from './ui/EventTooltip'
 import { TitleScreen } from './ui/TitleScreen'
 import { Hud } from './ui/Hud'
@@ -35,6 +36,7 @@ export default function App() {
         <ZonePanel />
         <EraPanel />
         <EventsPanel />
+        <AlternatePanel />
         <Loader />
       </div>
       <CountryTooltip />

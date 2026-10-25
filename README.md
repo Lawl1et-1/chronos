@@ -41,7 +41,7 @@ npm run dev
 | `ANTHROPIC_MODEL` | identifiant du modèle à utiliser |
 | `ANTHROPIC_EFFORT` | effort de raisonnement (`low` … `max`, `medium` par défaut ; vide = valeur du fournisseur) |
 | `ANTHROPIC_FALLBACKS` | repli automatique côté serveur en cas de refus ; `off` pour les modèles qui ne le gèrent pas |
-| `CHRONOS_MOCK` | `1` = données de démonstration (Allemagne, 1939), sans clé ni appel à l'IA |
+| `CHRONOS_MOCK` | `1` = données de démonstration (Allemagne, 1939, invasion de la Pologne), sans clé ni appel à l'IA |
 | `API_PORT` | port du serveur API (8787 par défaut) |
 
 ## API
@@ -51,6 +51,18 @@ de la période. La réponse du modèle est contrainte par un schéma JSON, puis 
 (5 événements, scores de 1 à 10, 3 modifications chacun) ; en cas d'échec, l'appel est relancé
 avec les erreurs de validation. Les résultats sont mis en cache en mémoire côté serveur et dans
 le `localStorage` côté client.
+
+`POST /api/alternate-history` — `{ zone, year, event, alteration }` → la chronologie alternative,
+en flux SSE :
+
+| Événement | Contenu |
+| --- | --- |
+| `partial` | ce qui est déjà complet : point de divergence, maillons de l'effet papillon, jalons |
+| `reset` | la réponse précédente était invalide, une nouvelle tentative commence |
+| `result` | la chronologie complète et validée (8 à 12 jalons chronologiques, confiance décroissante, 2025 au plus tard) |
+| `error` | `{ error, code }` |
+
+Le serveur lit le JSON au fil de l'écriture et n'envoie que les éléments terminés.
 
 ## Structure
 
@@ -78,7 +90,7 @@ en surbrillance dans le shader du globe.
 1. ✅ Globe + sélection de zone
 2. ✅ Timeline + époques
 3. ✅ Événements clés + monolithes
-4. Histoire alternative + branche
+4. ✅ Histoire alternative + branche
 5. Polish visuel et transitions
 
 ## Crédits

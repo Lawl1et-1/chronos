@@ -23,6 +23,21 @@ export function formatLatLon(lat: number, lon: number) {
 export function searchKey(s: string) {
   return s
     .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/\p{Diacritic}/gu, '')
     .toLowerCase()
+}
+
+const toPoint = new THREE.Vector3()
+
+/** True if the segment camera → point passes through the globe. */
+export function hiddenByGlobe(camera: THREE.Vector3, point: THREE.Vector3) {
+  toPoint.subVectors(point, camera)
+  const len = toPoint.length()
+  toPoint.divideScalar(len)
+  const b = camera.dot(toPoint)
+  const c = camera.lengthSq() - 1
+  const disc = b * b - c
+  if (disc < 0) return false
+  const hit = -b - Math.sqrt(disc)
+  return hit > 0 && hit < len
 }

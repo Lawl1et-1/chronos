@@ -5,6 +5,16 @@ export class ResultCache<T> {
 
   constructor(private limit = 200) {}
 
+  peek(key: string) {
+    return this.entries.get(key)
+  }
+
+  set(key: string, value: T) {
+    this.entries.delete(key)
+    this.entries.set(key, value)
+    if (this.entries.size > this.limit) this.entries.delete(this.entries.keys().next().value!)
+  }
+
   async get(key: string, compute: () => Promise<T>): Promise<T> {
     const hit = this.entries.get(key)
     if (hit !== undefined) {
@@ -18,8 +28,7 @@ export class ResultCache<T> {
 
     const promise = compute()
       .then((value) => {
-        this.entries.set(key, value)
-        if (this.entries.size > this.limit) this.entries.delete(this.entries.keys().next().value!)
+        this.set(key, value)
         return value
       })
       .finally(() => this.pending.delete(key))

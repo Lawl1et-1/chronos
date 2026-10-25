@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import type { KeyEvent } from '../../shared/schemas'
 import { formatRange, formatYear } from '../lib/time'
@@ -150,6 +151,9 @@ export function EventsPanel() {
 }
 
 function EventDetail({ event, index, onBack }: { event: KeyEvent; index: number; onBack: () => void }) {
+  const alteration = useChronos((s) => s.alteration)
+  const fracturing = useChronos((s) => s.fracturing)
+  const rewrite = useChronos((s) => s.rewrite)
   return (
     <>
       <div className="mt-3 flex items-baseline justify-between gap-3">
@@ -169,29 +173,79 @@ function EventDetail({ event, index, onBack }: { event: KeyEvent; index: number;
       <h3 className="mt-4 font-mono text-[10px] tracking-[0.3em] text-dust uppercase">Impact à long terme</h3>
       <p className="mt-1.5 text-sm leading-relaxed text-parchment/75">{event.longTermImpact}</p>
 
-      <h3 className="mt-5 font-mono text-[10px] tracking-[0.3em] text-alt uppercase">Et si…</h3>
-      <ul className="mt-2 flex flex-col gap-2">
-        {event.possibleAlterations.map((alt) => (
-          <li key={alt.title} className="rounded-lg border border-parchment/10 px-3 py-2">
-            <p className="text-sm">{alt.title}</p>
-            <p className="mt-0.5 text-xs leading-relaxed text-dust">{alt.description}</p>
-          </li>
-        ))}
-      </ul>
+      <AlterationPicker event={event} />
 
       <div className="mt-5 flex shrink-0 flex-col gap-2">
         <button
           type="button"
-          disabled
-          title="Disponible à l'étape suivante"
-          className="rounded-full bg-alt/90 px-5 py-2.5 font-mono text-xs tracking-[0.2em] text-void uppercase disabled:opacity-40"
+          onClick={rewrite}
+          disabled={!alteration || fracturing}
+          className="rounded-full bg-alt/90 px-5 py-2.5 font-mono text-xs tracking-[0.2em] text-void uppercase transition-colors hover:bg-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-alt disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Modifier cet événement →
+          Réécrire l'histoire →
         </button>
         <button type="button" onClick={onBack} className={ghostButton}>
           ← Les 5 événements <span className="opacity-50">(Échap)</span>
         </button>
       </div>
     </>
+  )
+}
+
+const FREE_MAX = 300
+
+/** The three suggested alterations plus a free one, as a single choice. */
+function AlterationPicker({ event }: { event: KeyEvent }) {
+  const alteration = useChronos((s) => s.alteration)
+  const setAlteration = useChronos((s) => s.setAlteration)
+  const [free, setFree] = useState('')
+  const isFree = !!alteration && !event.possibleAlterations.some((a) => a.title === alteration.title)
+
+  const option = (active: boolean) =>
+    `w-full rounded-lg border px-3 py-2 text-left transition-colors focus-visible:outline-2 focus-visible:outline-alt ${
+      active ? 'border-alt/70 bg-alt/10' : 'border-parchment/10 hover:border-parchment/25'
+    }`
+
+  return (
+    <fieldset className="mt-5">
+      <legend className="font-mono text-[10px] tracking-[0.3em] text-alt uppercase">Et si… choisissez la modification</legend>
+      <div className="mt-2 flex flex-col gap-2" role="radiogroup">
+        {event.possibleAlterations.map((alt) => {
+          const active = alteration?.title === alt.title
+          return (
+            <button
+              key={alt.title}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              onClick={() => setAlteration(alt)}
+              className={option(active)}
+            >
+              <span className={`block text-sm ${active ? 'text-alt' : ''}`}>{alt.title}</span>
+              <span className="mt-0.5 block text-xs leading-relaxed text-dust">{alt.description}</span>
+            </button>
+          )
+        })}
+        <label className={`${option(isFree)} block cursor-text`}>
+          <span className={`block text-sm ${isFree ? 'text-alt' : ''}`}>Votre propre hypothèse</span>
+          <textarea
+            rows={2}
+            maxLength={FREE_MAX}
+            value={free}
+            placeholder="Et si…"
+            onChange={(e) => {
+              setFree(e.target.value)
+              const text = e.target.value.trim()
+              setAlteration(text.length >= 3 ? { title: text, description: '' } : null)
+            }}
+            onFocus={() => {
+              const text = free.trim()
+              if (text.length >= 3) setAlteration({ title: text, description: '' })
+            }}
+            className="mt-1 w-full resize-none bg-transparent text-sm placeholder:text-dust/70 focus:outline-none"
+          />
+        </label>
+      </div>
+    </fieldset>
   )
 }
