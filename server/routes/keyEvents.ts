@@ -7,7 +7,7 @@ import {
   type KeyEventsResponse,
 } from '../../shared/schemas'
 import { ResultCache } from '../cache'
-import { generateStructured, LlmError } from '../llm'
+import { generateStructured, LlmError, providerId } from '../llm'
 import { DEMO_KEY_EVENTS } from '../mock/keyEvents'
 import { KEY_EVENTS_SYSTEM, keyEventsPrompt } from '../prompts/keyEvents'
 
@@ -26,7 +26,7 @@ export async function keyEventsRoute(req: Request, res: Response) {
     return
   }
 
-  const key = `${process.env.ANTHROPIC_MODEL}|${input.zone.iso ?? input.zone.name}|${input.year}`
+  const key = `${providerId()}|${input.zone.iso ?? input.zone.name}|${input.year}`
   try {
     const result = await cache.get(key, async () => {
       const started = Date.now()

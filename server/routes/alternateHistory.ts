@@ -10,7 +10,7 @@ import {
   type AlternateResponse,
 } from '../../shared/schemas'
 import { ResultCache } from '../cache'
-import { LlmError, streamStructured } from '../llm'
+import { LlmError, providerId, streamStructured } from '../llm'
 import { DEMO_ALTERNATE, DEMO_SUB_BRANCH } from '../mock/alternateHistory'
 import { ALTERNATE_SYSTEM, alternatePrompt } from '../prompts/alternateHistory'
 
@@ -94,7 +94,7 @@ export async function alternateHistoryRoute(req: Request, res: Response) {
     }
 
     const key = [
-      process.env.ANTHROPIC_MODEL,
+      providerId(),
       input.zone.iso ?? input.zone.name,
       input.year,
       input.event.id,

@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import express from 'express'
+import { providerId } from './llm'
 import { keyEventsRoute } from './routes/keyEvents'
 import { alternateHistoryRoute } from './routes/alternateHistory'
 import { createShareRoute, readShareRoute } from './routes/share'
@@ -20,8 +21,7 @@ app.use(express.json({ limit: '100kb' }))
 app.get('/api/health', (_req, res) => {
   res.json({
     ok: true,
-    model: process.env.ANTHROPIC_MODEL || null,
-    hasKey: Boolean(process.env.ANTHROPIC_API_KEY),
+    provider: providerId(),
     demo: process.env.CHRONOS_MOCK === '1',
   })
 })

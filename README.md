@@ -35,13 +35,14 @@ est désactivé par défaut : bouton haut-parleur dans un coin de l’écran.
 - Three.js (@react-three/fiber, @react-three/drei, @react-three/postprocessing)
 - Framer Motion, Zustand, Tailwind
 - Backend Express léger (la clé API reste côté serveur)
+- IA : Gemini (offre gratuite, par défaut) ou Anthropic, au choix via `LLM_PROVIDER`
 - Validation des réponses IA avec Zod
 
 ## Installation
 
 ```bash
 npm install
-cp .env.example .env   # renseigner ANTHROPIC_API_KEY et ANTHROPIC_MODEL
+cp .env.example .env   # renseigner GEMINI_API_KEY (clé gratuite sur Google AI Studio)
 npm run dev
 ```
 
@@ -61,10 +62,14 @@ Pour essayer sans clé API, mettez `CHRONOS_MOCK=1` dans `.env`.
 
 | Variable | Rôle |
 | --- | --- |
-| `ANTHROPIC_API_KEY` | clé API, lue uniquement par le serveur |
-| `ANTHROPIC_MODEL` | identifiant du modèle à utiliser |
-| `ANTHROPIC_EFFORT` | effort de raisonnement (`low` … `max`, `medium` par défaut ; vide = valeur du fournisseur) |
-| `ANTHROPIC_FALLBACKS` | repli automatique côté serveur en cas de refus ; `off` pour les modèles qui ne le gèrent pas |
+| `LLM_PROVIDER` | `gemini` (par défaut) ou `anthropic` |
+| `GEMINI_API_KEY` | clé Gemini, gratuite sur [Google AI Studio](https://aistudio.google.com/apikey) |
+| `GEMINI_MODEL` | modèle principal (`gemini-3.5-flash-lite` par défaut : rapide et inclus dans l'offre gratuite) |
+| `GEMINI_FALLBACK_MODELS` | modèles essayés ensuite si le principal est saturé (503), hors quota (429) ou trop lent |
+| `GEMINI_TIMEOUT_MS` | délai au-delà duquel on passe au modèle suivant (90 s par défaut) |
+| `ANTHROPIC_API_KEY` / `ANTHROPIC_MODEL` | clé et modèle si `LLM_PROVIDER=anthropic` |
+| `ANTHROPIC_EFFORT` | effort de raisonnement (`low` … `max`, `medium` par défaut) |
+| `ANTHROPIC_FALLBACKS` | repli côté serveur en cas de refus ; `off` pour les modèles qui ne le gèrent pas |
 | `CHRONOS_MOCK` | `1` = données de démonstration (Allemagne, 1939, invasion de la Pologne), sans clé ni appel à l'IA |
 | `API_PORT` | port du serveur API (8787 par défaut) |
 | `CHRONOS_SHARE_DIR` | dossier des liens de partage (`data/shares` par défaut) |
@@ -72,7 +77,7 @@ Pour essayer sans clé API, mettez `CHRONOS_MOCK=1` dans `.env`.
 ## API
 
 `POST /api/key-events` — `{ zone: { name, iso, lat, lon }, year }` → les 5 événements déterminants
-de la période. La réponse du modèle est contrainte par un schéma JSON, puis validée avec Zod
+de la période. La réponse du modèle est contrainte par un schéma JSON (dérivé des schémas Zod), puis validée avec Zod
 (5 événements, scores de 1 à 10, 3 modifications chacun) ; en cas d'échec, l'appel est relancé
 avec les erreurs de validation. Les résultats sont mis en cache en mémoire côté serveur et dans
 le `localStorage` côté client.
@@ -98,6 +103,7 @@ sous-branche, la requête ajoute `history` : les chronologies parentes, coupées
 
 ```
 server/          API Express (clé API côté serveur uniquement)
+  providers/     Gemini et Anthropic derrière une même interface
   prompts/       prompts système
   routes/        routes de l'API
   mock/          données de démonstration
@@ -137,6 +143,14 @@ en surbrillance dans le shader du globe.
 - ✅ Partage d'une chronologie par URL
 - ✅ Mode comparaison réalité / alternative
 - ✅ Branches de branches (arbre 3D)
+
+## Offre gratuite Gemini
+
+- Les limites (requêtes par minute et par jour) dépendent du projet Google : consultez-les dans
+  AI Studio. Une partie se joue d'un clic : 1 appel pour les 5 événements, 1 par branche.
+- Sur l'offre gratuite, Google peut utiliser les requêtes pour améliorer ses produits.
+- Les modèles les plus demandés peuvent être saturés : le serveur bascule alors automatiquement sur
+  le modèle suivant de `GEMINI_FALLBACK_MODELS`.
 
 ## Crédits
 

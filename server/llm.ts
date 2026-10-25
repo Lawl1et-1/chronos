@@ -1,28 +1,20 @@
-import Anthropic from '@anthropic-ai/sdk'
-import { betaZodOutputFormat } from '@anthropic-ai/sdk/helpers/beta/zod'
 import { z } from 'zod'
+import { anthropicProvider } from './providers/anthropic'
+import { geminiProvider } from './providers/gemini'
+import { LlmError, type JsonResult, type Provider } from './providers/types'
 
-export class LlmError extends Error {
-  constructor(
-    message: string,
-    readonly code: string,
-    readonly status: number,
-  ) {
-    super(message)
-  }
-}
+export { LlmError }
 
-let client: Anthropic | null = null
+let provider: Provider | null = null
 
-export function llmConfig() {
-  const apiKey = process.env.ANTHROPIC_API_KEY
-  const model = process.env.ANTHROPIC_MODEL
-  if (!apiKey) throw new LlmError('Clé API absente : renseignez ANTHROPIC_API_KEY dans .env.', 'missing_key', 503)
-  if (!model) throw new LlmError('Modèle absent : renseignez ANTHROPIC_MODEL dans .env.', 'missing_model', 503)
-  client ??= new Anthropic({ apiKey })
-  const effort = process.env.ANTHROPIC_EFFORT ?? 'medium'
-  const fallbacks = process.env.ANTHROPIC_FALLBACKS !== 'off'
-  return { client, model, effort, fallbacks }
+/** The configured provider (LLM_PROVIDER, Gemini by default), created on first use. */
+export function llm(): Provider {
+  if (provider) return provider
+  const name = (process.env.LLM_PROVIDER ?? 'gemini').toLowerCase()
+  if (name === 'gemini') provider = geminiProvider()
+  else if (name === 'anthropic') provider = anthropicProvider()
+  else throw new LlmError(`Fournisseur inconnu : ${name} (gemini ou anthropic).`, 'missing_model', 503)
+  return provider
 }
 
 interface StructuredRequest<Out extends z.ZodType, Full extends z.ZodType> {
@@ -36,92 +28,6 @@ interface StructuredRequest<Out extends z.ZodType, Full extends z.ZodType> {
   attempts?: number
 }
 
-type Effort = 'low' | 'medium' | 'high' | 'xhigh' | 'max'
-
-function withFeedback(prompt: string, feedback: string) {
-  return feedback
-    ? `${prompt}\n\nTa réponse précédente était invalide :\n${feedback}\nRenvoie une réponse complète qui corrige ces points.`
-    : prompt
-}
-
-function requestParams(system: string, content: string, output: z.ZodType, maxTokens: number) {
-  const { model, effort, fallbacks } = llmConfig()
-  return {
-    model,
-    max_tokens: maxTokens,
-    system,
-    messages: [{ role: 'user' as const, content }],
-    output_config: {
-      ...(effort ? { effort: effort as Effort } : {}),
-      format: betaZodOutputFormat(output),
-    },
-    // on a policy decline, let the API retry on a fallback model in the same call
-    ...(fallbacks ? { betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default' as const } : {}),
-  }
-}
-
-/** Maps SDK errors to user-facing ones; returns null for errors worth a retry. */
-function apiError(error: unknown): LlmError | null {
-  if (error instanceof LlmError) return error
-  if (error instanceof Anthropic.AuthenticationError) {
-    return new LlmError('Clé API refusée par le fournisseur.', 'auth', 502)
-  }
-  if (error instanceof Anthropic.RateLimitError) {
-    return new LlmError('Limite de requêtes atteinte, réessayez dans un instant.', 'rate_limited', 429)
-  }
-  if (error instanceof Anthropic.BadRequestError) {
-    return new LlmError(`Requête rejetée par l'API : ${error.message}`, 'bad_request', 502)
-  }
-  if (error instanceof Anthropic.APIError) {
-    return new LlmError("Le service d'IA ne répond pas correctement.", 'upstream', 502)
-  }
-  return null
-}
-
-const refused = () => new LlmError('Le modèle a refusé de traiter cette demande.', 'refusal', 422)
-const exhausted = () => new LlmError("Réponse invalide de l'IA après plusieurs essais.", 'invalid_output', 502)
-const TRUNCATED = '- la réponse a été tronquée : sois plus concis.'
-
-/**
- * One structured call with validation. Invalid or truncated output is retried with
- * the validation error appended, up to `attempts` times.
- */
-export async function generateStructured<Out extends z.ZodType, Full extends z.ZodType>({
-  system,
-  prompt,
-  output,
-  validate,
-  maxTokens = 16000,
-  attempts = 3,
-}: StructuredRequest<Out, Full>): Promise<z.infer<Full>> {
-  const { client } = llmConfig()
-  let feedback = ''
-
-  for (let attempt = 1; attempt <= attempts; attempt++) {
-    try {
-      const response = await client.beta.messages.parse(
-        requestParams(system, withFeedback(prompt, feedback), output, maxTokens),
-      )
-      if (response.stop_reason === 'refusal') throw refused()
-      if (response.stop_reason === 'max_tokens') {
-        feedback = TRUNCATED
-        continue
-      }
-      const checked = validate.safeParse(response.parsed_output)
-      if (checked.success) return checked.data
-      feedback = z.prettifyError(checked.error).slice(0, 2000)
-      console.warn(`[chronos] invalid output (attempt ${attempt}/${attempts})\n${feedback}`)
-    } catch (error) {
-      const fatal = apiError(error)
-      if (fatal) throw fatal
-      // JSON that could not be parsed at all: retry like any other invalid output
-      feedback = `- JSON illisible : ${(error as Error).message}`
-      console.warn(`[chronos] unparseable output (attempt ${attempt}/${attempts})`)
-    }
-  }
-  throw exhausted()
-}
-
 interface StreamRequest<Out extends z.ZodType, Full extends z.ZodType> extends StructuredRequest<Out, Full> {
   /** Called with the JSON text written so far. */
   onText: (snapshot: string) => void
@@ -130,36 +36,32 @@ interface StreamRequest<Out extends z.ZodType, Full extends z.ZodType> extends S
   signal?: AbortSignal
 }
 
-/** Streaming variant of generateStructured: same validation and retries, with live text. */
-export async function streamStructured<Out extends z.ZodType, Full extends z.ZodType>({
-  system,
-  prompt,
-  output,
-  validate,
-  onText,
-  onRetry,
-  signal,
-  maxTokens = 32000,
-  attempts = 3,
-}: StreamRequest<Out, Full>): Promise<z.infer<Full>> {
-  const { client } = llmConfig()
-  let feedback = ''
+function withFeedback(prompt: string, feedback: string) {
+  return feedback
+    ? `${prompt}\n\nTa réponse précédente était invalide :\n${feedback}\nRenvoie une réponse complète qui corrige ces points.`
+    : prompt
+}
 
+/**
+ * Shared validation loop: invalid, unparseable or truncated output is retried with the
+ * problem appended to the prompt, up to `attempts` times.
+ */
+async function validated<Full extends z.ZodType>(
+  attempts: number,
+  validate: Full,
+  call: (prompt: string, attempt: number) => Promise<JsonResult>,
+  prompt: string,
+  signal?: AbortSignal,
+): Promise<z.infer<Full>> {
+  let feedback = ''
   for (let attempt = 1; attempt <= attempts; attempt++) {
-    if (attempt > 1) onRetry()
     try {
-      const stream = client.beta.messages.stream(
-        requestParams(system, withFeedback(prompt, feedback), output, maxTokens),
-        { signal },
-      )
-      stream.on('text', (_delta, snapshot) => onText(snapshot))
-      const message = await stream.finalMessage()
-      if (message.stop_reason === 'refusal') throw refused()
-      if (message.stop_reason === 'max_tokens') {
-        feedback = TRUNCATED
+      const { text, finish } = await call(withFeedback(prompt, feedback), attempt)
+      if (finish === 'refusal') throw new LlmError('Le modèle a refusé de traiter cette demande.', 'refusal', 422)
+      if (finish === 'max_tokens') {
+        feedback = '- la réponse a été tronquée : sois plus concis.'
         continue
       }
-      const text = message.content.map((b) => (b.type === 'text' ? b.text : '')).join('')
       let json: unknown
       try {
         json = JSON.parse(text)
@@ -170,13 +72,59 @@ export async function streamStructured<Out extends z.ZodType, Full extends z.Zod
       const checked = validate.safeParse(json)
       if (checked.success) return checked.data
       feedback = z.prettifyError(checked.error).slice(0, 2000)
-      console.warn(`[chronos] invalid streamed output (attempt ${attempt}/${attempts})\n${feedback}`)
+      console.warn(`[chronos] invalid output (attempt ${attempt}/${attempts})\n${feedback}`)
     } catch (error) {
-      if (signal?.aborted) throw error
-      const fatal = apiError(error)
-      if (fatal) throw fatal
+      if (error instanceof LlmError || signal?.aborted) throw error
       feedback = `- erreur : ${(error as Error).message}`
+      console.warn(`[chronos] failed attempt ${attempt}/${attempts}: ${(error as Error).message}`)
     }
   }
-  throw exhausted()
+  throw new LlmError("Réponse invalide de l'IA après plusieurs essais.", 'invalid_output', 502)
+}
+
+/** One structured call, validated and retried. */
+export function generateStructured<Out extends z.ZodType, Full extends z.ZodType>({
+  system,
+  prompt,
+  output,
+  validate,
+  maxTokens = 16000,
+  attempts = 3,
+}: StructuredRequest<Out, Full>): Promise<z.infer<Full>> {
+  const provider = llm()
+  return validated(attempts, validate, (p) => provider.generate({ system, prompt: p, output, maxTokens }), prompt)
+}
+
+/** Streaming variant: same validation and retries, with the JSON text as it is written. */
+export function streamStructured<Out extends z.ZodType, Full extends z.ZodType>({
+  system,
+  prompt,
+  output,
+  validate,
+  onText,
+  onRetry,
+  signal,
+  maxTokens = 32000,
+  attempts = 3,
+}: StreamRequest<Out, Full>): Promise<z.infer<Full>> {
+  const provider = llm()
+  return validated(
+    attempts,
+    validate,
+    (p, attempt) => {
+      if (attempt > 1) onRetry()
+      return provider.stream({ system, prompt: p, output, maxTokens, signal, onText })
+    },
+    prompt,
+    signal,
+  )
+}
+
+/** Provider + model identity for cache keys, or "unconfigured" (never throws). */
+export function providerId() {
+  try {
+    return llm().id
+  } catch {
+    return 'unconfigured'
+  }
 }
