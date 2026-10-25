@@ -1,7 +1,19 @@
+import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import type { AlternatePartial, AlternateResponse, TimelineNode } from '../../shared/schemas'
+import type { TimelineNode } from '../../shared/schemas'
 import { formatYear } from '../lib/time'
-import { selectedCountry, useChronos } from '../store/useChronos'
+import {
+  MAX_DEPTH,
+  activeBranchOf,
+  branchContent,
+  branchDepth,
+  branchLabel,
+  branchPath,
+  selectedCountry,
+  useChronos,
+  type Branch,
+} from '../store/useChronos'
+import { ShareButton } from './ShareButton'
 
 const ghostButton =
   'rounded-full px-5 py-2 font-mono text-xs tracking-[0.2em] text-dust uppercase transition-colors hover:text-parchment focus-visible:outline-2 focus-visible:outline-real'
@@ -19,24 +31,48 @@ function Confidence({ value }: { value: number }) {
   )
 }
 
+/** Réalité › Branche 1 › Branche 1.2 — each step switches to that branch. */
+function Breadcrumb({ branch }: { branch: Branch }) {
+  const branches = useChronos((s) => s.branches)
+  const setActiveBranch = useChronos((s) => s.setActiveBranch)
+  const path = branchPath(branches, branch)
+  if (path.length < 2) return null
+  return (
+    <nav aria-label="Branches" className="mt-3 flex flex-wrap items-center gap-1 font-mono text-[10px] text-dust">
+      {path.map((b, i) => (
+        <span key={b.id} className="flex items-center gap-1">
+          {i > 0 && <span aria-hidden>›</span>}
+          {b.id === branch.id ? (
+            <span className="text-parchment">{branchLabel(b.id)}</span>
+          ) : (
+            <button type="button" onClick={() => setActiveBranch(b.id)} className="hover:text-parchment">
+              {branchLabel(b.id)}
+            </button>
+          )}
+        </span>
+      ))}
+    </nav>
+  )
+}
+
 export function AlternatePanel() {
   const phase = useChronos((s) => s.phase)
   const country = useChronos(selectedCountry)
-  const alternate = useChronos((s) => s.alternate)
-  const alteration = useChronos((s) => s.alteration)
+  const branch = useChronos(activeBranchOf)
+  const branches = useChronos((s) => s.branches)
   const selectedNode = useChronos((s) => s.selectedNode)
-  const { selectNode, back, loadAlternate, clearSelection } = useChronos.getState()
+  const { selectNode, back, loadBranch, clearSelection, setComparing, setActiveBranch } = useChronos.getState()
 
-  const content: AlternateResponse | AlternatePartial | null =
-    alternate.status === 'ready' ? alternate.data : alternate.status === 'idle' ? null : alternate.partial
+  const content = branch ? branchContent(branch) : null
   const nodes = content?.timeline ?? []
   const node = selectedNode !== null ? nodes[selectedNode] : undefined
-  const data = alternate.status === 'ready' ? alternate.data : null
-  const view = phase !== 'alternate' ? null : node ? `node-${selectedNode}` : 'overview'
+  const data = branch?.data ?? null
+  const view = phase !== 'alternate' || !branch ? null : node ? `${branch.id}-node-${selectedNode}` : `${branch.id}-overview`
+  const children = branch ? branches.filter((b) => b.parentId === branch.id) : []
 
   return (
     <AnimatePresence mode="wait">
-      {view && country && alteration && (
+      {view && country && branch && (
         <motion.aside
           key={view}
           initial={{ opacity: 0, x: 40 }}
@@ -48,15 +84,24 @@ export function AlternatePanel() {
           <p className="self-start rounded-full border border-rupture/50 px-2.5 py-0.5 font-mono text-[9px] tracking-[0.25em] text-rupture uppercase">
             Chronologie spéculative{data?.demo ? ' · démo' : ''}
           </p>
+          <Breadcrumb branch={branch} />
 
           {node ? (
-            <NodeDetail node={node} index={selectedNode!} count={nodes.length} onSelect={selectNode} />
+            <NodeDetail
+              branch={branch}
+              node={node}
+              index={selectedNode!}
+              count={nodes.length}
+              onSelect={selectNode}
+            />
           ) : (
             <>
-              <p className={`${heading} mt-4 text-alt`}>Et si…</p>
-              <h2 className="mt-1 font-display text-3xl leading-tight font-medium">{alteration.title}</h2>
+              <p className={`${heading} mt-4 text-alt`}>
+                {branch.parentId ? `Et si, en ${formatYear(branch.event.year)}…` : 'Et si…'}
+              </p>
+              <h2 className="mt-1 font-display text-3xl leading-tight font-medium">{branch.alteration.title}</h2>
 
-              {alternate.status === 'streaming' && (
+              {branch.status === 'streaming' && (
                 <div className="mt-4" aria-live="polite">
                   <p className="text-sm text-parchment/70">
                     {nodes.length
@@ -75,16 +120,29 @@ export function AlternatePanel() {
                 </div>
               )}
 
-              {alternate.status === 'error' && (
+              {branch.status === 'error' && (
                 <div className="mt-4" role="alert">
-                  <p className="text-sm text-rupture">{alternate.message}</p>
+                  <p className="text-sm text-rupture">{branch.message}</p>
                   <button
                     type="button"
-                    onClick={() => void loadAlternate()}
+                    onClick={() => void loadBranch(branch.id)}
                     className="mt-3 rounded-full bg-alt/90 px-5 py-2 font-mono text-xs tracking-[0.2em] text-void uppercase hover:bg-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-alt"
                   >
                     Réessayer
                   </button>
+                </div>
+              )}
+
+              {data && (
+                <div className="mt-4 flex flex-wrap items-start gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setComparing(true)}
+                    className="rounded-full bg-real/90 px-4 py-2 font-mono text-[11px] tracking-[0.2em] text-void uppercase transition-colors hover:bg-real focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-real"
+                  >
+                    Comparer à la réalité
+                  </button>
+                  <ShareButton />
                 </div>
               )}
 
@@ -117,20 +175,28 @@ export function AlternatePanel() {
                 <section className="mt-5">
                   <h3 className={`${heading} text-dust`}>Jalons de la branche</h3>
                   <ol className="-mx-2 mt-2">
-                    {nodes.map((n, i) => (
-                      <li key={i}>
-                        <button
-                          type="button"
-                          onClick={() => selectNode(i)}
-                          className="flex w-full items-baseline gap-3 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-parchment/5 focus-visible:outline-2 focus-visible:outline-alt"
-                        >
-                          <span className="w-16 shrink-0 font-mono text-[11px] text-alt tabular-nums">
-                            {formatYear(n.year)}
-                          </span>
-                          <span className="min-w-0 flex-1 text-sm leading-snug">{n.title}</span>
-                        </button>
-                      </li>
-                    ))}
+                    {nodes.map((n, i) => {
+                      const forks = children.filter((c) => c.forkNode === i)
+                      return (
+                        <li key={i}>
+                          <button
+                            type="button"
+                            onClick={() => selectNode(i)}
+                            className="flex w-full items-baseline gap-3 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-parchment/5 focus-visible:outline-2 focus-visible:outline-alt"
+                          >
+                            <span className="w-16 shrink-0 font-mono text-[11px] text-alt tabular-nums">
+                              {formatYear(n.year)}
+                            </span>
+                            <span className="min-w-0 flex-1 text-sm leading-snug">{n.title}</span>
+                            {forks.length > 0 && (
+                              <span className="shrink-0 font-mono text-[10px] text-branch" title="Sous-branches">
+                                ⑂ {forks.length}
+                              </span>
+                            )}
+                          </button>
+                        </li>
+                      )
+                    })}
                   </ol>
                 </section>
               )}
@@ -148,13 +214,35 @@ export function AlternatePanel() {
                 </>
               )}
 
+              {children.length > 0 && (
+                <section className="mt-5">
+                  <h3 className={`${heading} text-branch`}>Sous-branches</h3>
+                  <ul className="-mx-2 mt-2">
+                    {children.map((c) => (
+                      <li key={c.id}>
+                        <button
+                          type="button"
+                          onClick={() => setActiveBranch(c.id)}
+                          className="w-full rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-parchment/5 focus-visible:outline-2 focus-visible:outline-alt"
+                        >
+                          <span className="font-mono text-[10px] text-dust">
+                            {branchLabel(c.id)} · {formatYear(c.event.year)}
+                          </span>
+                          <span className="block text-sm leading-snug">{c.alteration.title}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+
               <p className="mt-5 text-[11px] leading-relaxed text-dust">
                 Scénario hypothétique généré par IA. Les comparaisons « dans la réalité » s'appuient sur des faits ;
                 tout le reste est spéculatif.
               </p>
               <div className="mt-3 flex flex-wrap gap-x-2">
                 <button type="button" onClick={back} className={`${ghostButton} px-0`}>
-                  ← Autre modification
+                  {branch.parentId ? '← Branche parente' : '← Autre modification'}
                 </button>
                 <button type="button" onClick={clearSelection} className={ghostButton}>
                   Nouvelle zone
@@ -169,16 +257,20 @@ export function AlternatePanel() {
 }
 
 function NodeDetail({
+  branch,
   node,
   index,
   count,
   onSelect,
 }: {
+  branch: Branch
   node: TimelineNode
   index: number
   count: number
   onSelect: (i: number | null) => void
 }) {
+  const branches = useChronos((s) => s.branches)
+  const canFork = branch.status === 'ready' && branchDepth(branches, branch) < MAX_DEPTH
   return (
     <>
       <div className="mt-4 flex items-baseline justify-between gap-3">
@@ -208,6 +300,8 @@ function NodeDetail({
         </section>
       )}
 
+      {canFork && <ForkForm key={`${branch.id}-${index}`} node={node} index={index} />}
+
       <div className="mt-5 flex items-center justify-between">
         <button
           type="button"
@@ -233,5 +327,73 @@ function NodeDetail({
         ← Vue d'ensemble <span className="opacity-50">(Échap)</span>
       </button>
     </>
+  )
+}
+
+/** Rewrites a milestone of this alternate timeline, which grows a sub-branch from it. */
+function ForkForm({ node, index }: { node: TimelineNode; index: number }) {
+  const forkBranch = useChronos((s) => s.forkBranch)
+  const [open, setOpen] = useState(false)
+  const [text, setText] = useState('')
+  const suggestions = [
+    `Et si « ${node.title} » n'avait pas eu lieu ?`,
+    `Et si « ${node.title} » avait échoué ?`,
+    `Et si « ${node.title} » était survenu dix ans plus tôt ?`,
+  ]
+  const fork = (title: string) => forkBranch(index, { title: title.slice(0, 300), description: '' })
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="mt-5 self-start rounded-full border border-branch/40 px-4 py-2 font-mono text-[11px] tracking-[0.2em] text-branch uppercase transition-colors hover:bg-branch/10 focus-visible:outline-2 focus-visible:outline-branch"
+      >
+        ⑂ Modifier ce jalon
+      </button>
+    )
+  }
+  return (
+    <section className="mt-5 rounded-lg border border-branch/30 p-3">
+      <h3 className={`${heading} text-branch`}>Nouvelle sous-branche</h3>
+      <div className="mt-2 flex flex-col gap-1.5">
+        {suggestions.map((s) => (
+          <button
+            key={s}
+            type="button"
+            onClick={() => fork(s)}
+            className="rounded-md border border-parchment/10 px-2.5 py-1.5 text-left text-xs transition-colors hover:border-branch/50 focus-visible:outline-2 focus-visible:outline-branch"
+          >
+            {s}
+          </button>
+        ))}
+      </div>
+      <form
+        className="mt-2 flex gap-2"
+        onSubmit={(e) => {
+          e.preventDefault()
+          if (text.trim().length >= 3) fork(text.trim())
+        }}
+      >
+        <label className="sr-only" htmlFor="fork-text">
+          Votre hypothèse
+        </label>
+        <input
+          id="fork-text"
+          value={text}
+          maxLength={300}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Ou votre propre hypothèse…"
+          className="min-w-0 flex-1 rounded-md border border-parchment/15 bg-transparent px-2.5 py-1.5 text-xs placeholder:text-dust/70 focus:border-branch/60 focus:outline-none"
+        />
+        <button
+          type="submit"
+          disabled={text.trim().length < 3}
+          className="rounded-md bg-branch/90 px-3 font-mono text-[10px] tracking-[0.15em] text-void uppercase disabled:opacity-40"
+        >
+          Créer
+        </button>
+      </form>
+    </section>
   )
 }

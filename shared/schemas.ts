@@ -90,6 +90,19 @@ export const AlternateRequestSchema = z.object({
     summary: z.string().max(800),
   }),
   alteration: AlterationSchema,
+  /**
+   * For a sub-branch: the alternate timelines it grows from, oldest first, each cut
+   * at the milestone where the next branch forks.
+   */
+  history: z
+    .array(
+      z.object({
+        alteration: z.string().max(300),
+        milestones: z.array(z.object({ year: z.number().int(), title: z.string().max(200) })).max(12),
+      }),
+    )
+    .max(4)
+    .optional(),
 })
 export type AlternateRequest = z.infer<typeof AlternateRequestSchema>
 
@@ -148,5 +161,31 @@ export const AlternatePartialSchema = z.object({
 })
 export type AlternatePartial = z.infer<typeof AlternatePartialSchema>
 
-export const ApiErrorSchema =z.object({ error: z.string(), code: z.string() })
+// ---------------------------------------------------------------------------
+// Shared links
+
+export const SharedBranchSchema = z.object({
+  id: z.string().regex(/^b\d+(\.\d+){0,4}$/),
+  parentId: z.string().max(40).nullable(),
+  forkNode: z.number().int().min(0).nullable(),
+  event: AlternateRequestSchema.shape.event,
+  alteration: AlterationSchema,
+  data: AlternateResponseSchema,
+})
+export type SharedBranch = z.infer<typeof SharedBranchSchema>
+
+export const SharePayloadSchema = z.object({
+  version: z.literal(1),
+  zone: ZoneSchema,
+  year: z.number().int(),
+  keyEvents: KeyEventsResponseSchema,
+  selectedEvent: z.string().max(80),
+  branches: z.array(SharedBranchSchema).min(1).max(20),
+  activeBranch: z.string().max(40),
+})
+export type SharePayload = z.infer<typeof SharePayloadSchema>
+
+export const ShareCreatedSchema = z.object({ id: z.string() })
+
+export const ApiErrorSchema = z.object({ error: z.string(), code: z.string() })
 export type ApiError = z.infer<typeof ApiErrorSchema>

@@ -21,15 +21,32 @@ Contenu attendu :
 Garde-fous :
 - La comparaison avec la réalité ne contient que des faits vérifiables.
 - Sujets sensibles (guerres, persécutions, génocides, esclavage) : ton factuel et respectueux. Aucune glorification d'un régime, d'une idéologie, d'un crime ou de ses auteurs. Ne décris jamais un crime de masse comme souhaitable, et ne présente pas un scénario plus meurtrier avec complaisance. Les crimes réels restent nommés comme tels dans les comparaisons.
-- Si la modification proposée est absurde ou anachronique, prends l'hypothèse la plus proche qui reste plausible et dis-le dans "divergencePoint".`
+- Si la modification proposée est absurde ou anachronique, prends l'hypothèse la plus proche qui reste plausible et dis-le dans "divergencePoint".
+
+Sous-branches : on peut te demander de modifier un jalon d'une chronologie déjà alternative. Dans ce cas, le monde de départ est cette chronologie alternative (pas l'histoire réelle) jusqu'au jalon modifié ; ta nouvelle chronologie part de ce jalon. Les comparaisons "realHistoryComparison" restent fondées sur l'histoire réelle.`
 
 const fmt = (y: number) => (y < 0 ? `${-y} av. J.-C.` : String(y))
 
-export function alternatePrompt({ zone, year, event, alteration }: AlternateRequest) {
-  return `Zone : ${zone.name}
+function historyContext(history: AlternateRequest['history']) {
+  if (!history?.length) return ''
+  const levels = history.map(
+    (h, i) => `${i + 1}. Modification : ${h.alteration}
+   Jalons jusqu'au point de bifurcation :
+${h.milestones.map((m) => `   - ${fmt(m.year)} : ${m.title}`).join('\n')}`,
+  )
+  return `Cette chronologie diverge déjà de l'histoire réelle. Branches précédentes, de la plus ancienne à la plus récente :
+${levels.join('\n')}
+
+Le jalon ci-dessous appartient à cette chronologie alternative ; c'est lui qui est modifié.
+
+`
+}
+
+export function alternatePrompt({ zone, year, event, alteration, history }: AlternateRequest) {
+  return `${historyContext(history)}Zone : ${zone.name}
 Époque choisie : ${fmt(year)}
 
-Événement réel : ${event.title} (${event.date})
+${history?.length ? 'Jalon alternatif' : 'Événement réel'} : ${event.title} (${event.date})
 ${event.summary}
 
 Modification : ${alteration.title}

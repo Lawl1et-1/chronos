@@ -11,7 +11,7 @@ import {
 } from '../../shared/schemas'
 import { ResultCache } from '../cache'
 import { LlmError, streamStructured } from '../llm'
-import { DEMO_ALTERNATE } from '../mock/alternateHistory'
+import { DEMO_ALTERNATE, DEMO_SUB_BRANCH } from '../mock/alternateHistory'
 import { ALTERNATE_SYSTEM, alternatePrompt } from '../prompts/alternateHistory'
 
 const cache = new ResultCache<AlternateResponse>(100)
@@ -56,8 +56,8 @@ export function completedParts(text: string): AlternatePartial | null {
 }
 
 /** Replays the demo scenario with delays, so the streaming UI can be tried without a key. */
-async function streamDemo(send: Send, signal: AbortSignal) {
-  const { divergencePoint, butterflyEffects, timeline } = DEMO_ALTERNATE
+async function streamDemo(send: Send, signal: AbortSignal, demo: AlternateResponse) {
+  const { divergencePoint, butterflyEffects, timeline } = demo
   await sleep(900, signal)
   send('partial', { divergencePoint, timeline: [] })
   await sleep(900, signal)
@@ -67,7 +67,7 @@ async function streamDemo(send: Send, signal: AbortSignal) {
     send('partial', { divergencePoint, butterflyEffects, timeline: timeline.slice(0, i) })
   }
   await sleep(500, signal)
-  send('result', DEMO_ALTERNATE)
+  send('result', demo)
 }
 
 export async function alternateHistoryRoute(req: Request, res: Response) {
@@ -89,7 +89,7 @@ export async function alternateHistoryRoute(req: Request, res: Response) {
 
   try {
     if (process.env.CHRONOS_MOCK === '1') {
-      await streamDemo(send, controller.signal)
+      await streamDemo(send, controller.signal, input.history?.length ? DEMO_SUB_BRANCH : DEMO_ALTERNATE)
       return
     }
 
@@ -100,6 +100,7 @@ export async function alternateHistoryRoute(req: Request, res: Response) {
       input.event.id,
       input.alteration.title.trim().toLowerCase(),
       input.alteration.description.trim().toLowerCase(),
+      JSON.stringify(input.history ?? []),
     ].join('|')
     const cached = cache.peek(key)
     if (cached) {

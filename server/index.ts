@@ -3,6 +3,7 @@ import { resolve } from 'node:path'
 import express from 'express'
 import { keyEventsRoute } from './routes/keyEvents'
 import { alternateHistoryRoute } from './routes/alternateHistory'
+import { createShareRoute, readShareRoute } from './routes/share'
 
 try {
   process.loadEnvFile()
@@ -11,6 +12,9 @@ try {
 }
 
 const app = express()
+// shared scenarios carry whole timelines: they get a larger body limit than the rest
+app.post('/api/share', express.json({ limit: '1mb' }), createShareRoute)
+app.get('/api/share/:id', readShareRoute)
 app.use(express.json({ limit: '100kb' }))
 
 app.get('/api/health', (_req, res) => {

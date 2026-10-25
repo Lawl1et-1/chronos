@@ -30,14 +30,15 @@ export function startDirector() {
       kick(0.6, 1.6)
     }
 
-    // one chime per milestone as the alternate timeline streams in
-    const count = (a: typeof s.alternate) =>
-      a.status === 'streaming' || a.status === 'error'
-        ? (a.partial?.timeline.length ?? 0)
-        : a.status === 'ready'
-          ? a.data.timeline.length
-          : 0
-    const added = count(s.alternate) - count(prev.alternate)
-    if (s.alternate.status === 'streaming' && added > 0) sound.play('chime')
+    // a new sub-branch grows out of a milestone
+    if (s.phase === 'alternate' && s.branches.length > prev.branches.length && prev.branches.length > 0) {
+      sound.play('rise')
+      kick(0.8, 0.6)
+    }
+
+    // one chime per milestone as a timeline streams in
+    const streamed = (state: typeof s) =>
+      state.branches.reduce((n, b) => n + (b.status === 'streaming' ? (b.partial?.timeline.length ?? 0) : 0), 0)
+    if (streamed(s) > streamed(prev)) sound.play('chime')
   })
 }

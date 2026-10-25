@@ -16,6 +16,16 @@ diverger de la ligne temporelle réelle.
 4. **Divergence** — choisissez une modification (proposée ou libre) : le monolithe se brise, la caméra
    recule et la branche alternative se sépare de la ligne réelle, jalon par jalon.
 
+Ensuite :
+
+- **Sous-branches** — chaque jalon d'une chronologie alternative peut être modifié à son tour
+  (« Modifier ce jalon ») : une nouvelle branche violette s'en détache, jusqu'à 3 niveaux. L'IA reçoit
+  la chronologie parente jusqu'au point de bifurcation.
+- **Mode comparaison** — réalité et chronologie alternative côte à côte, jalon par jalon, en suivant
+  les branches depuis la racine.
+- **Partage** — « Partager » enregistre le scénario terminé et copie un lien `/?s=…` qui le rouvre tel
+  quel, sans nouvel appel à l'IA.
+
 `Échap` revient d'une étape à tout moment. Le son (ambiance et effets, synthétisés dans le navigateur)
 est désactivé par défaut : bouton haut-parleur dans un coin de l’écran.
 
@@ -57,6 +67,7 @@ Pour essayer sans clé API, mettez `CHRONOS_MOCK=1` dans `.env`.
 | `ANTHROPIC_FALLBACKS` | repli automatique côté serveur en cas de refus ; `off` pour les modèles qui ne le gèrent pas |
 | `CHRONOS_MOCK` | `1` = données de démonstration (Allemagne, 1939, invasion de la Pologne), sans clé ni appel à l'IA |
 | `API_PORT` | port du serveur API (8787 par défaut) |
+| `CHRONOS_SHARE_DIR` | dossier des liens de partage (`data/shares` par défaut) |
 
 ## API
 
@@ -76,7 +87,12 @@ en flux SSE :
 | `result` | la chronologie complète et validée (8 à 12 jalons chronologiques, confiance décroissante, 2025 au plus tard) |
 | `error` | `{ error, code }` |
 
-Le serveur lit le JSON au fil de l'écriture et n'envoie que les éléments terminés.
+Le serveur lit le JSON au fil de l'écriture et n'envoie que les éléments terminés. Pour une
+sous-branche, la requête ajoute `history` : les chronologies parentes, coupées à chaque bifurcation.
+
+`POST /api/share` — le scénario terminé (événements, branches) → `{ id }`.
+`GET /api/share/:id` — le scénario enregistré. Les liens sont stockés en fichiers JSON dans
+`data/shares` (`CHRONOS_SHARE_DIR` pour changer de dossier).
 
 ## Structure
 
@@ -115,6 +131,12 @@ en surbrillance dans le shader du globe.
 3. ✅ Événements clés + monolithes
 4. ✅ Histoire alternative + branche
 5. ✅ Polish visuel et transitions
+
+## Fonctionnalités bonus
+
+- ✅ Partage d'une chronologie par URL
+- ✅ Mode comparaison réalité / alternative
+- ✅ Branches de branches (arbre 3D)
 
 ## Crédits
 

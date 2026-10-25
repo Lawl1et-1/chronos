@@ -4,11 +4,14 @@ import {
   AlternateResponseSchema,
   ApiErrorSchema,
   KeyEventsResponseSchema,
+  ShareCreatedSchema,
+  SharePayloadSchema,
   type AlternatePartial,
   type AlternateRequest,
   type AlternateResponse,
   type KeyEventsRequest,
   type KeyEventsResponse,
+  type SharePayload,
 } from '../../shared/schemas'
 
 const CACHE_PREFIX = 'chronos:v1:'
@@ -83,6 +86,7 @@ export async function streamAlternateHistory(
     req.event.id,
     req.alteration.title.trim().toLowerCase(),
     req.alteration.description.trim().toLowerCase(),
+    JSON.stringify(req.history ?? []),
   ].join(':')
   const cached = readCache(key, AlternateResponseSchema)
   if (cached) return cached
@@ -135,6 +139,29 @@ export async function streamAlternateHistory(
     }
   }
   throw new ApiRequestError('La connexion a été interrompue avant la fin.', 'interrupted')
+}
+
+/** Stores a finished scenario on the server and returns its short id. */
+export async function createShare(payload: SharePayload): Promise<string> {
+  const { id } = await postJson('/api/share', payload, ShareCreatedSchema)
+  return id
+}
+
+export async function fetchShare(id: string): Promise<SharePayload> {
+  let res: Response
+  try {
+    res = await fetch(`/api/share/${encodeURIComponent(id)}`)
+  } catch {
+    throw new ApiRequestError('Serveur injoignable.', 'network')
+  }
+  const json = await res.json().catch(() => null)
+  if (!res.ok) {
+    const err = ApiErrorSchema.safeParse(json)
+    throw new ApiRequestError(err.success ? err.data.error : `Erreur ${res.status}`, err.success ? err.data.code : 'http')
+  }
+  const parsed = SharePayloadSchema.safeParse(json)
+  if (!parsed.success) throw new ApiRequestError('Lien de partage invalide.', 'invalid_response')
+  return parsed.data
 }
 
 export async function fetchKeyEvents(req: KeyEventsRequest, signal?: AbortSignal): Promise<KeyEventsResponse> {

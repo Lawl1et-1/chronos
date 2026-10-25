@@ -14,6 +14,9 @@ import { CountryTooltip } from './ui/CountryTooltip'
 import { ZonePanel } from './ui/ZonePanel'
 import { Loader } from './ui/Loader'
 import { SoundToggle } from './ui/SoundToggle'
+import { ComparisonView } from './ui/ComparisonView'
+import { fetchShare } from './api/client'
+import { sharedIdFromUrl } from './lib/share'
 
 /** A warm flash across the screen while the chosen event shatters. */
 function FractureVeil() {
@@ -38,6 +41,13 @@ function FractureVeil() {
 export default function App() {
   useEffect(() => {
     const stopDirector = startDirector()
+    // a shared link (?s=…) is fetched right away and opened from the title screen
+    const sharedId = sharedIdFromUrl()
+    if (sharedId) {
+      fetchShare(sharedId)
+        .then((share) => useChronos.getState().setPendingShare(share))
+        .catch((error: Error) => useChronos.getState().setShareError(error.message))
+    }
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return
       // let inputs handle their own Escape (clearing a search, etc.)
@@ -66,6 +76,7 @@ export default function App() {
           <EraPanel />
           <EventsPanel />
           <AlternatePanel />
+          <ComparisonView />
           <SoundToggle />
           <Loader />
         </div>

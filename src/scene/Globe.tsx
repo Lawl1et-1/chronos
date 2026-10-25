@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import { useFrame, type ThreeEvent } from '@react-three/fiber'
 import { useTexture } from '@react-three/drei'
 import { loadCountries } from '../lib/countries'
-import { useChronos } from '../store/useChronos'
+import { activeBranchOf, branchContent, useChronos } from '../store/useChronos'
 import { earthFragment, earthVertex } from './shaders/earth'
 import { sunDir } from './sun'
 import { useProgressiveTexture } from './useProgressiveTexture'
@@ -34,15 +34,8 @@ export function Globe() {
       useChronos.subscribe((s) => {
         const weights = regions.image.data as Uint8Array
         weights.fill(0)
-        const a = s.alternate
-        const nodes =
-          s.phase !== 'alternate'
-            ? []
-            : a.status === 'ready'
-              ? a.data.timeline
-              : a.status === 'idle'
-                ? []
-                : (a.partial?.timeline ?? [])
+        const branch = activeBranchOf(s)
+        const nodes = s.phase === 'alternate' && branch ? (branchContent(branch)?.timeline ?? []) : []
         nodes.forEach((node, i) => {
           // the selected milestone stands out, the others stay faint
           const w = s.selectedNode === null ? 90 : s.selectedNode === i ? 230 : 0

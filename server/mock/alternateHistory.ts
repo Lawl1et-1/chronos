@@ -168,3 +168,138 @@ export const DEMO_ALTERNATE: AlternateResponse = {
   plausibilityNote:
     "Plusieurs historiens jugent qu'en septembre 1939, la ligne Siegfried était faiblement défendue et qu'une offensive française résolue aurait pu gêner l'Allemagne. Mais la doctrine défensive de l'armée française et la lenteur de sa mobilisation rendaient ce choix improbable. Au-delà de 1940, le scénario repose sur un coup d'État réussi, hypothèse très fragile : la confiance baisse fortement.",
 }
+
+/**
+ * Demo sub-branch, served for any fork in demo mode: it reads best when forked from
+ * the 1940 coup milestone above. Speculative, with factual comparisons.
+ */
+export const DEMO_SUB_BRANCH: AlternateResponse = {
+  demo: true,
+  divergencePoint: {
+    year: 1940,
+    title: 'Le putsch des généraux échoue',
+    description:
+      "Dans cette chronologie, les officiers conjurés sont trahis avant d'agir. Hitler survit, le régime se maintient et poursuit une guerre déjà engagée sur deux fronts depuis 1939.",
+  },
+  butterflyEffects: [
+    {
+      cause: 'Échec du coup d\'État',
+      effect: "Purge massive de l'état-major et contrôle accru du parti sur l'armée",
+    },
+    {
+      cause: 'Commandement désorganisé sur deux fronts',
+      effect: "L'armée allemande s'épuise sans victoire décisive à l'ouest comme à l'est",
+    },
+    {
+      cause: "Faiblesse militaire allemande visible",
+      effect: "L'URSS choisit d'entrer en guerre pour s'emparer de l'Europe centrale",
+    },
+  ],
+  timeline: [
+    {
+      year: 1940,
+      title: 'La purge des officiers',
+      description:
+        "Les conjurés sont arrêtés et exécutés. Le régime renforce la répression intérieure et place des fidèles à la tête des armées, au détriment de leur compétence.",
+      realHistoryComparison:
+        "Dans la réalité, en mai-juin 1940, l'Allemagne envahit les Pays-Bas, la Belgique et la France, qui signe l'armistice le 22 juin.",
+      confidence: 0.5,
+      affectedRegions: [{ name: 'Allemagne', iso: '276' }],
+    },
+    {
+      year: 1940,
+      title: "Guerre d'usure sur le Rhin",
+      description:
+        "Le front se fige entre Sarre et Rhin. Le blocus allié prive l'Allemagne de pétrole et de métaux, tandis que la production française et britannique s'accélère.",
+      realHistoryComparison:
+        "Dans la réalité, la bataille d'Angleterre oppose la Luftwaffe à la Royal Air Force de juillet à octobre 1940.",
+      confidence: 0.4,
+      affectedRegions: [
+        { name: 'France', iso: '250' },
+        { name: 'Allemagne', iso: '276' },
+        { name: 'Royaume-Uni', iso: '826' },
+      ],
+    },
+    {
+      year: 1941,
+      title: "L'Armée rouge entre en guerre",
+      description:
+        "Constatant l'affaiblissement allemand, Staline rompt le pacte et attaque à l'ouest pour occuper la Pologne et les pays baltes avant les Alliés occidentaux.",
+      realHistoryComparison:
+        "Dans la réalité, c'est l'Allemagne qui envahit l'URSS le 22 juin 1941 (opération Barbarossa).",
+      confidence: 0.3,
+      affectedRegions: [
+        { name: 'Russie', iso: '643' },
+        { name: 'Pologne', iso: '616' },
+        { name: 'Lituanie', iso: '440' },
+      ],
+    },
+    {
+      year: 1942,
+      title: 'Effondrement militaire allemand',
+      description:
+        "Pris en tenaille, le Reich perd la Rhénanie à l'ouest et la Silésie à l'est. Le régime s'effondre au printemps ; ses crimes, dont les persécutions de masse déjà engagées, sont documentés par les armées qui avancent.",
+      realHistoryComparison:
+        "Dans la réalité, l'Allemagne atteint en 1942 sa plus grande extension ; la bataille de Stalingrad commence à l'été.",
+      confidence: 0.25,
+      affectedRegions: [
+        { name: 'Allemagne', iso: '276' },
+        { name: 'Pologne', iso: '616' },
+      ],
+    },
+    {
+      year: 1943,
+      title: "Une Allemagne occupée en deux zones",
+      description:
+        "Les armées alliées et soviétiques se rejoignent sur l'Elbe. Le pays est occupé, l'ouest par les Franco-Britanniques, l'est par l'URSS.",
+      realHistoryComparison:
+        "Dans la réalité, l'Allemagne capitule le 8 mai 1945 et est divisée en quatre zones d'occupation.",
+      confidence: 0.2,
+      affectedRegions: [
+        { name: 'Allemagne', iso: '276' },
+        { name: 'Russie', iso: '643' },
+        { name: 'France', iso: '250' },
+        { name: 'Royaume-Uni', iso: '826' },
+      ],
+    },
+    {
+      year: 1949,
+      title: "Rideau de fer sur l'Elbe",
+      description:
+        "Deux États allemands naissent, comme dans la réalité mais plus tôt, et l'Europe centrale passe sous influence soviétique. Les États-Unis, restés neutres, s'engagent tard en Europe.",
+      realHistoryComparison:
+        "Dans la réalité, la RFA et la RDA sont fondées en 1949, l'année de la création de l'OTAN.",
+      confidence: 0.15,
+      affectedRegions: [
+        { name: 'Allemagne', iso: '276' },
+        { name: 'États-Unis', iso: '840' },
+      ],
+    },
+    {
+      year: 1956,
+      title: 'Une Europe occidentale plus fragile',
+      description:
+        "Sans plan Marshall d'ampleur, la reconstruction de l'ouest est plus lente et la France et le Royaume-Uni s'endettent pour tenir face au bloc soviétique.",
+      realHistoryComparison:
+        "Dans la réalité, le plan Marshall finance la reconstruction de l'Europe occidentale de 1948 à 1952.",
+      confidence: 0.12,
+      affectedRegions: [
+        { name: 'France', iso: '250' },
+        { name: 'Royaume-Uni', iso: '826' },
+      ],
+    },
+    {
+      year: 1990,
+      title: 'Réunification négociée',
+      description:
+        "Comme dans la réalité, l'affaiblissement économique du bloc soviétique conduit à la réunification allemande, au terme d'une division plus longue de quelques années.",
+      realHistoryComparison: "Dans la réalité, l'Allemagne est réunifiée le 3 octobre 1990.",
+      confidence: 0.1,
+      affectedRegions: [{ name: 'Allemagne', iso: '276' }],
+    },
+  ],
+  worldIn2025:
+    "Dans cette sous-branche, le monde de 2025 ressemble davantage au nôtre : une Europe longtemps divisée, une Allemagne réunifiée tardivement et une Union européenne née plus tard. Les États-Unis y jouent un rôle moindre et l'Europe occidentale a connu une reconstruction plus difficile.",
+  plausibilityNote:
+    "Le scénario suppose que l'URSS rompe le pacte de 1939 pour attaquer une Allemagne affaiblie, hypothèse discutable compte tenu de l'état de l'Armée rouge après les purges de 1937-1938. La confiance baisse vite après 1942.",
+}
