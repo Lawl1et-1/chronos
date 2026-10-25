@@ -24,12 +24,39 @@ cp .env.example .env   # renseigner ANTHROPIC_API_KEY et ANTHROPIC_MODEL
 npm run dev
 ```
 
+- Front : http://localhost:5173
+- API : http://localhost:8787 (proxifiée sous `/api` par Vite, `API_PORT` pour changer le port)
+
+| Script | Rôle |
+| --- | --- |
+| `npm run dev` | front + API en parallèle |
+| `npm run build` | vérification TypeScript + build de production |
+| `npm run textures` | régénère les textures webp de `public/textures` |
+
+## Structure
+
+```
+server/          API Express (clé API côté serveur uniquement)
+src/scene/       scène 3D : globe, nuages, atmosphère, étoiles, caméra
+src/ui/          interface 2D par-dessus la scène
+src/lib/         géographie, chargement des pays et carte d'index
+src/store/       état global (Zustand)
+public/          textures et frontières (TopoJSON)
+```
+
+Les pays sont rendus dans une carte d'index équirectangulaire (un octet par pixel) :
+elle sert à la fois au survol/clic (lecture directe au point UV touché) et à la mise
+en surbrillance dans le shader du globe.
+
 ## Statut
 
-En cours de construction — étapes :
-
-1. Globe + sélection de zone
+1. ✅ Globe + sélection de zone
 2. Timeline + époques
 3. Événements clés + monolithes
 4. Histoire alternative + branche
 5. Polish visuel et transitions
+
+## Crédits
+
+- Textures terrestres : NASA Blue Marble / Black Marble (domaine public), via `three-globe`
+- Frontières : Natural Earth via `world-atlas`

@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Cormorant Garamond", ui-serif, Georgia, serif;
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --color-void: #020308;
+  --color-ink: #0a0e18;
+  --color-parchment: #ece6d6;
+  --color-dust: #8f8a7e;
+  --color-real: #7fd0ff;
+  --color-alt: #e8b65a;
+  --color-rupture: #e0604a;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  background: var(--color-void);
+  color: var(--color-parchment);
+  font-family: var(--font-sans);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.glass {
+  background: color-mix(in oklab, var(--color-ink) 62%, transparent);
+  backdrop-filter: blur(14px) saturate(1.2);
+  border: 1px solid color-mix(in oklab, var(--color-parchment) 12%, transparent);
+}
