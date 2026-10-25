@@ -40,6 +40,7 @@ server/          API Express (clé API côté serveur uniquement)
 src/scene/       scène 3D : globe, nuages, atmosphère, étoiles, caméra
 src/ui/          interface 2D par-dessus la scène
 src/lib/         géographie, chargement des pays et carte d'index
+src/data/        époques suggérées par pays (et par région en repli)
 src/store/       état global (Zustand)
 public/          textures et frontières (TopoJSON)
 ```
@@ -51,7 +52,7 @@ en surbrillance dans le shader du globe.
 ## Statut
 
 1. ✅ Globe + sélection de zone
-2. Timeline + époques
+2. ✅ Timeline + époques
 3. Événements clés + monolithes
 4. Histoire alternative + branche
 5. Polish visuel et transitions

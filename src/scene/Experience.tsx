@@ -6,6 +6,7 @@ import { Globe } from './Globe'
 import { Atmosphere, Clouds } from './Atmosphere'
 import { Starfield } from './Starfield'
 import { CameraRig } from './CameraRig'
+import { TimeSpiral } from './TimeSpiral'
 
 export function Experience() {
   return (
@@ -20,6 +21,7 @@ export function Experience() {
         <Globe />
         <Clouds />
         <Atmosphere />
+        <TimeSpiral />
       </Suspense>
       <CameraRig />
       <EffectComposer multisampling={4}>

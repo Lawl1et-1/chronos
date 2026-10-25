@@ -9,6 +9,7 @@ import { sunDir } from './sun'
 
 const DIST_INTRO = 4.8
 const DIST_GLOBE = 3.3
+const DIST_ERA = 5.3
 const FLIGHT_SECONDS = 2.1
 
 interface Flight {
@@ -46,8 +47,15 @@ export function CameraRig() {
       toDir = latLonToVector3(target.center[0], target.center[1], 1)
       toDist = 1 + THREE.MathUtils.clamp(target.extent * 3.8, 0.5, 2.1)
     }
+    if (phase === 'era' && target) {
+      // step back and look from a gentle latitude so the whole spiral reads
+      toDir = latLonToVector3(THREE.MathUtils.clamp(target.center[0], -18, 24), target.center[1], 1)
+      const cam = camera as THREE.PerspectiveCamera
+      const halfWidth = Math.tan(THREE.MathUtils.degToRad(cam.fov / 2)) * (size.width / size.height)
+      toDist = THREE.MathUtils.clamp(1.95 / halfWidth, DIST_ERA, 9)
+    }
     flight.current = { fromDir, toDir, fromDist, toDist, t: 0 }
-  }, [phase, target, camera])
+  }, [phase, target, camera, size])
 
   useFrame((_, dt) => {
     const c = controls.current
@@ -66,17 +74,18 @@ export function CameraRig() {
     }
     if (c) {
       c.enabled = !flight.current && phase !== 'intro'
-      c.autoRotate = !flight.current && phase !== 'zone'
+      c.autoRotate = !flight.current && (phase === 'intro' || phase === 'globe')
       c.autoRotateSpeed = phase === 'intro' ? 0.35 : 0.22
       c.update()
     }
-    // shift the projection so the focused country sits beside the zone panel
+    // shift the projection so the focus sits beside the side panel
     // (right of the screen on desktop, bottom on mobile)
     const { width, height } = size
     const wide = width >= 640
-    const focus = phase === 'zone' ? 1 : 0
-    offset.x = THREE.MathUtils.damp(offset.x, wide ? focus * Math.min(200, width * 0.16) : 0, 3, dt)
-    offset.y = THREE.MathUtils.damp(offset.y, wide ? 0 : focus * height * 0.18, 3, dt)
+    const shiftX = phase === 'zone' ? Math.min(200, width * 0.16) : phase === 'era' ? Math.min(250, width * 0.19) : 0
+    const shiftY = phase === 'zone' ? height * 0.18 : phase === 'era' ? height * 0.24 : 0
+    offset.x = THREE.MathUtils.damp(offset.x, wide ? shiftX : 0, 3, dt)
+    offset.y = THREE.MathUtils.damp(offset.y, wide ? 0 : shiftY, 3, dt)
     const cam = camera as THREE.PerspectiveCamera
     if (Math.abs(offset.x) + Math.abs(offset.y) > 0.5) cam.setViewOffset(width, height, offset.x, offset.y, width, height)
     else if (cam.view?.enabled) cam.clearViewOffset()
@@ -98,7 +107,7 @@ export function CameraRig() {
       rotateSpeed={0.45}
       zoomSpeed={0.6}
       minDistance={1.25}
-      maxDistance={6}
+      maxDistance={9}
     />
   )
 }

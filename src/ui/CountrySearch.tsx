@@ -19,7 +19,7 @@ export function CountrySearch() {
     return [...starts, ...contains].slice(0, 6).map((e) => e.c)
   }, [index, query])
 
-  if (phase === 'intro') return null
+  if (phase !== 'globe' && phase !== 'zone') return null
 
   const choose = (i: number) => {
     const c = matches[i]
@@ -64,7 +64,7 @@ export function CountrySearch() {
             <li key={c.index} role="option" aria-selected={i === active}>
               <button
                 type="button"
-                onMouseEnter={() => setActive(i)}
+                onMouseMove={() => setActive(i)}
                 onClick={() => choose(i)}
                 className={`w-full px-4 py-2 text-left text-sm ${i === active ? 'bg-real/12 text-real' : ''}`}
               >

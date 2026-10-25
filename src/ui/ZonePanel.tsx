@@ -1,23 +1,16 @@
-import { useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { formatLatLon } from '../lib/geo'
 import { selectedCountry, useChronos } from '../store/useChronos'
 
 export function ZonePanel() {
   const country = useChronos(selectedCountry)
+  const phase = useChronos((s) => s.phase)
   const clearSelection = useChronos((s) => s.clearSelection)
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && useChronos.getState().selected) clearSelection()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [clearSelection])
+  const openEra = useChronos((s) => s.openEra)
 
   return (
     <AnimatePresence mode="wait">
-      {country && (
+      {phase === 'zone' && country && (
         <motion.aside
           key={country.index}
           className="glass pointer-events-auto absolute right-4 bottom-4 left-4 rounded-2xl p-6 sm:top-1/2 sm:right-8 sm:bottom-auto sm:left-auto sm:w-[22rem] sm:-translate-y-1/2"
@@ -33,16 +26,15 @@ export function ZonePanel() {
           <div className="my-6 h-px bg-gradient-to-r from-alt/50 via-parchment/10 to-transparent" />
 
           <p className="text-sm leading-relaxed text-parchment/70">
-            Prochaine étape : choisir une époque sur la ligne du temps, puis découvrir les cinq événements qui l'ont
+            Prochaine étape : choisir une époque sur la spirale du temps, puis découvrir les cinq événements qui l'ont
             façonnée.
           </p>
 
           <div className="mt-6 flex flex-col gap-2">
             <button
               type="button"
-              disabled
-              title="Disponible à l'étape suivante"
-              className="rounded-full bg-alt/90 px-5 py-2.5 font-mono text-xs tracking-[0.2em] text-void uppercase disabled:opacity-40"
+              onClick={openEra}
+              className="rounded-full bg-alt/90 px-5 py-2.5 font-mono text-xs tracking-[0.2em] text-void uppercase transition-colors hover:bg-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-alt"
             >
               Choisir une époque →
             </button>
