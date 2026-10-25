@@ -12,6 +12,7 @@ export function EraPanel() {
   const year = useChronos((s) => s.year)
   const setYear = useChronos((s) => s.setYear)
   const backToZone = useChronos((s) => s.backToZone)
+  const explore = useChronos((s) => s.explore)
   const eras = useMemo(() => (country ? erasFor(country) : []), [country])
 
   // free typing: keep a draft until it parses into a valid year
@@ -115,9 +116,8 @@ export function EraPanel() {
           <div className="mt-4 flex shrink-0 flex-col gap-2">
             <button
               type="button"
-              disabled
-              title="Disponible à l'étape suivante"
-              className="rounded-full bg-alt/90 px-5 py-2.5 font-mono text-xs tracking-[0.2em] text-void uppercase disabled:opacity-40"
+              onClick={explore}
+              className="rounded-full bg-alt/90 px-5 py-2.5 font-mono text-xs tracking-[0.2em] text-void uppercase transition-colors hover:bg-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-alt"
             >
               Explorer {formatYear(year)} →
             </button>

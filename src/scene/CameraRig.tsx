@@ -6,6 +6,7 @@ import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
 import { latLonToVector3 } from '../lib/geo'
 import { selectedCountry, useChronos } from '../store/useChronos'
 import { sunDir } from './sun'
+import { eventsDistance, zoneDistance } from './framing'
 
 const DIST_INTRO = 4.8
 const DIST_GLOBE = 3.3
@@ -43,9 +44,9 @@ export function CameraRig() {
     const fromDist = camera.position.length()
     let toDir = fromDir.clone()
     let toDist = phase === 'intro' ? DIST_INTRO : DIST_GLOBE
-    if (phase === 'zone' && target) {
+    if ((phase === 'zone' || phase === 'events') && target) {
       toDir = latLonToVector3(target.center[0], target.center[1], 1)
-      toDist = 1 + THREE.MathUtils.clamp(target.extent * 3.8, 0.5, 2.1)
+      toDist = phase === 'zone' ? zoneDistance(target) : eventsDistance(target)
     }
     if (phase === 'era' && target) {
       // step back and look from a gentle latitude so the whole spiral reads
@@ -82,8 +83,9 @@ export function CameraRig() {
     // (right of the screen on desktop, bottom on mobile)
     const { width, height } = size
     const wide = width >= 640
-    const shiftX = phase === 'zone' ? Math.min(200, width * 0.16) : phase === 'era' ? Math.min(250, width * 0.19) : 0
-    const shiftY = phase === 'zone' ? height * 0.18 : phase === 'era' ? height * 0.24 : 0
+    const panel = phase === 'era' || phase === 'events'
+    const shiftX = phase === 'zone' ? Math.min(200, width * 0.16) : panel ? Math.min(250, width * 0.19) : 0
+    const shiftY = phase === 'zone' ? height * 0.18 : phase === 'era' ? height * 0.24 : phase === 'events' ? height * 0.15 : 0
     offset.x = THREE.MathUtils.damp(offset.x, wide ? shiftX : 0, 3, dt)
     offset.y = THREE.MathUtils.damp(offset.y, wide ? 0 : shiftY, 3, dt)
     const cam = camera as THREE.PerspectiveCamera

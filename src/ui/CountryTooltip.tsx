@@ -16,7 +16,7 @@ export function CountryTooltip() {
     return () => window.removeEventListener('pointermove', move)
   }, [])
 
-  const visible = phase !== 'intro' && country && country.index !== selected
+  const visible = (phase === 'globe' || phase === 'zone') && country && country.index !== selected
 
   return (
     <div

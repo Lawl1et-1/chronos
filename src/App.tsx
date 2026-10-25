@@ -2,6 +2,8 @@ import { useEffect } from 'react'
 import { Experience } from './scene/Experience'
 import { useChronos } from './store/useChronos'
 import { EraPanel } from './ui/EraPanel'
+import { EventsPanel } from './ui/EventsPanel'
+import { EventTooltip } from './ui/EventTooltip'
 import { TitleScreen } from './ui/TitleScreen'
 import { Hud } from './ui/Hud'
 import { CountrySearch } from './ui/CountrySearch'
@@ -32,9 +34,11 @@ export default function App() {
         <CountrySearch />
         <ZonePanel />
         <EraPanel />
+        <EventsPanel />
         <Loader />
       </div>
       <CountryTooltip />
+      <EventTooltip />
     </main>
   )
 }

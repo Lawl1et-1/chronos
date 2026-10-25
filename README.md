@@ -33,11 +33,35 @@ npm run dev
 | `npm run build` | vérification TypeScript + build de production |
 | `npm run textures` | régénère les textures webp de `public/textures` |
 
+### Variables d'environnement
+
+| Variable | Rôle |
+| --- | --- |
+| `ANTHROPIC_API_KEY` | clé API, lue uniquement par le serveur |
+| `ANTHROPIC_MODEL` | identifiant du modèle à utiliser |
+| `ANTHROPIC_EFFORT` | effort de raisonnement (`low` … `max`, `medium` par défaut ; vide = valeur du fournisseur) |
+| `ANTHROPIC_FALLBACKS` | repli automatique côté serveur en cas de refus ; `off` pour les modèles qui ne le gèrent pas |
+| `CHRONOS_MOCK` | `1` = données de démonstration (Allemagne, 1939), sans clé ni appel à l'IA |
+| `API_PORT` | port du serveur API (8787 par défaut) |
+
+## API
+
+`POST /api/key-events` — `{ zone: { name, iso, lat, lon }, year }` → les 5 événements déterminants
+de la période. La réponse du modèle est contrainte par un schéma JSON, puis validée avec Zod
+(5 événements, scores de 1 à 10, 3 modifications chacun) ; en cas d'échec, l'appel est relancé
+avec les erreurs de validation. Les résultats sont mis en cache en mémoire côté serveur et dans
+le `localStorage` côté client.
+
 ## Structure
 
 ```
 server/          API Express (clé API côté serveur uniquement)
-src/scene/       scène 3D : globe, nuages, atmosphère, étoiles, caméra
+  prompts/       prompts système
+  routes/        routes de l'API
+  mock/          données de démonstration
+shared/          schémas Zod communs au client et au serveur
+src/api/         appels à l'API et cache local
+src/scene/       scène 3D : globe, nuages, atmosphère, étoiles, spirale, monolithes, caméra
 src/ui/          interface 2D par-dessus la scène
 src/lib/         géographie, chargement des pays et carte d'index
 src/data/        époques suggérées par pays (et par région en repli)
@@ -53,7 +77,7 @@ en surbrillance dans le shader du globe.
 
 1. ✅ Globe + sélection de zone
 2. ✅ Timeline + époques
-3. Événements clés + monolithes
+3. ✅ Événements clés + monolithes
 4. Histoire alternative + branche
 5. Polish visuel et transitions
 

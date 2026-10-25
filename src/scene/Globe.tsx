@@ -46,7 +46,7 @@ export function Globe() {
     const { hovered, selected, phase } = useChronos.getState()
     const u = material.uniforms
     u.time.value += dt
-    u.hovered.value = phase === 'intro' ? 0 : hovered
+    u.hovered.value = phase === 'globe' || phase === 'zone' ? hovered : 0
     u.selected.value = selected
     u.focus.value = THREE.MathUtils.damp(u.focus.value, selected ? 1 : 0, 3, dt)
   })
@@ -62,7 +62,8 @@ export function Globe() {
       <mesh
         material={material}
         onPointerMove={(e) => {
-          if (useChronos.getState().phase === 'intro') return
+          const { phase } = useChronos.getState()
+          if (phase !== 'globe' && phase !== 'zone') return
           const i = pointerIndex(e)
           useChronos.getState().hover(i)
           setCursor(i ? 'pointer' : '')
@@ -73,7 +74,7 @@ export function Globe() {
         }}
         onClick={(e) => {
           const state = useChronos.getState()
-          if (state.phase === 'intro' || e.delta > 6) return
+          if ((state.phase !== 'globe' && state.phase !== 'zone') || e.delta > 6) return
           const i = pointerIndex(e)
           if (i) state.select(i)
         }}

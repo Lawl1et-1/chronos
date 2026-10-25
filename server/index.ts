@@ -1,4 +1,5 @@
 import express from 'express'
+import { keyEventsRoute } from './routes/keyEvents'
 
 try {
   process.loadEnvFile()
@@ -10,8 +11,15 @@ const app = express()
 app.use(express.json({ limit: '100kb' }))
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, model: process.env.ANTHROPIC_MODEL || null, hasKey: Boolean(process.env.ANTHROPIC_API_KEY) })
+  res.json({
+    ok: true,
+    model: process.env.ANTHROPIC_MODEL || null,
+    hasKey: Boolean(process.env.ANTHROPIC_API_KEY),
+    demo: process.env.CHRONOS_MOCK === '1',
+  })
 })
+
+app.post('/api/key-events', keyEventsRoute)
 
 const port = Number(process.env.API_PORT ?? 8787)
 app.listen(port, () => console.log(`[chronos] api listening on http://localhost:${port}`))
