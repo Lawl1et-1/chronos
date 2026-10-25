@@ -13,10 +13,11 @@ import { CountrySearch } from './ui/CountrySearch'
 import { CountryTooltip } from './ui/CountryTooltip'
 import { ZonePanel } from './ui/ZonePanel'
 import { Loader } from './ui/Loader'
-import { SoundToggle } from './ui/SoundToggle'
+import { Toolbar } from './ui/Toolbar'
 import { ComparisonView } from './ui/ComparisonView'
-import { KeyButton, KeyDialog } from './ui/KeyDialog'
-import { sharedFromUrl } from './api/client'
+import { KeyDialog } from './ui/KeyDialog'
+import { ApiRequestError, sharedFromUrl } from './api/client'
+import { errorText, translate } from './i18n'
 
 /** A warm flash across the screen while the chosen event shatters. */
 function FractureVeil() {
@@ -44,7 +45,11 @@ export default function App() {
     // a shared link is loaded right away and opened from the title screen
     sharedFromUrl()
       ?.then((share) => useChronos.getState().setPendingShare(share))
-      .catch((error: Error) => useChronos.getState().setShareError(error.message))
+      .catch((error: Error) =>
+        useChronos
+          .getState()
+          .setShareError(error instanceof ApiRequestError ? errorText(error.code, error.message) : translate('share.invalid')),
+      )
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return
       // let inputs handle their own Escape (clearing a search, etc.)
@@ -74,8 +79,7 @@ export default function App() {
           <EventsPanel />
           <AlternatePanel />
           <ComparisonView />
-          <SoundToggle />
-          <KeyButton />
+          <Toolbar />
           <KeyDialog />
           <Loader />
         </div>

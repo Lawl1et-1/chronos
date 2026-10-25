@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { hoveredCountry, useChronos } from '../store/useChronos'
+import { countryName } from '../lib/countries'
+import { useLang } from '../i18n'
 
 /** Follows the pointer without re-rendering on every move. */
 export function CountryTooltip() {
@@ -7,6 +9,7 @@ export function CountryTooltip() {
   const country = useChronos(hoveredCountry)
   const selected = useChronos((s) => s.selected)
   const phase = useChronos((s) => s.phase)
+  useLang((s) => s.lang) // re-render names on a language switch
 
   useEffect(() => {
     const move = (e: PointerEvent) => {
@@ -24,7 +27,7 @@ export function CountryTooltip() {
       className="pointer-events-none fixed top-0 left-0 z-20 transition-opacity duration-150"
       style={{ opacity: visible ? 1 : 0 }}
     >
-      <div className="glass rounded-md px-3 py-1.5 text-sm whitespace-nowrap">{country?.name}</div>
+      <div className="glass rounded-md px-3 py-1.5 text-sm whitespace-nowrap">{country && countryName(country)}</div>
     </div>
   )
 }

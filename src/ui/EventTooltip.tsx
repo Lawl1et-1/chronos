@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { keyEventsData, useChronos } from '../store/useChronos'
+import { useT } from '../i18n'
 
 /** Detail shown next to the pointer while hovering a monolith in the scene. */
 export function EventTooltip() {
@@ -9,6 +10,7 @@ export function EventTooltip() {
   const hoveredEvent = useChronos((s) => s.hoveredEvent)
   const selectedEvent = useChronos((s) => s.selectedEvent)
   const phase = useChronos((s) => s.phase)
+  const t = useT()
 
   useEffect(() => {
     const move = (e: PointerEvent) => {
@@ -39,7 +41,7 @@ export function EventTooltip() {
           <p className="font-mono text-[10px] tracking-[0.2em] text-real uppercase">{event.date}</p>
           <p className="mt-1 font-display text-xl leading-tight">{event.title}</p>
           <p className="mt-2 text-xs leading-relaxed text-parchment/80">{event.whyItMattered}</p>
-          <p className="mt-2 font-mono text-[10px] text-dust">Cliquer pour le détail</p>
+          <p className="mt-2 font-mono text-[10px] text-dust">{t('events.clickDetail')}</p>
         </div>
       )}
     </div>

@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { searchKey } from '../lib/geo'
 import { useChronos } from '../store/useChronos'
+import { countryName } from '../lib/countries'
+import { useLang, useT } from '../i18n'
 
 export function CountrySearch() {
   const phase = useChronos((s) => s.phase)
@@ -9,14 +11,30 @@ export function CountrySearch() {
   const select = useChronos((s) => s.select)
   const [query, setQuery] = useState('')
   const [active, setActive] = useState(0)
+  const lang = useLang((s) => s.lang)
+  const t = useT()
 
-  const index = useMemo(() => countries.map((c) => ({ c, key: searchKey(c.name) })), [countries])
+  // names in both languages are searchable; the current language ranks first
+  const index = useMemo(
+    () =>
+      countries.map((c) => ({
+        c,
+        current: searchKey(c.names[lang]),
+        other: searchKey(c.names[lang === 'fr' ? 'en' : 'fr']),
+      })),
+    [countries, lang],
+  )
   const matches = useMemo(() => {
     const q = searchKey(query.trim())
     if (!q) return []
-    const starts = index.filter((e) => e.key.startsWith(q))
-    const contains = index.filter((e) => !e.key.startsWith(q) && e.key.includes(q))
-    return [...starts, ...contains].slice(0, 6).map((e) => e.c)
+    const rank = (e: (typeof index)[number]) =>
+      e.current.startsWith(q) ? 0 : e.other.startsWith(q) ? 1 : e.current.includes(q) || e.other.includes(q) ? 2 : 3
+    return index
+      .map((e) => ({ e, r: rank(e) }))
+      .filter(({ r }) => r < 3)
+      .sort((a, b) => a.r - b.r)
+      .slice(0, 6)
+      .map(({ e }) => e.c)
   }, [index, query])
 
   if (phase !== 'globe' && phase !== 'zone') return null
@@ -30,19 +48,19 @@ export function CountrySearch() {
 
   return (
     <motion.div
-      className="pointer-events-auto absolute top-24 right-4 left-4 sm:top-7 sm:right-7 sm:left-auto sm:w-72"
+      className="pointer-events-auto absolute top-24 right-4 left-4 sm:top-20 sm:right-7 sm:left-auto sm:w-72"
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.8, duration: 0.8 }}
     >
       <label className="sr-only" htmlFor="country-search">
-        Rechercher un pays
+        {t('search.label')}
       </label>
       <input
         id="country-search"
         type="search"
         autoComplete="off"
-        placeholder="Rechercher un pays…"
+        placeholder={t('search.placeholder')}
         value={query}
         onChange={(e) => {
           setQuery(e.target.value)
@@ -68,7 +86,7 @@ export function CountrySearch() {
                 onClick={() => choose(i)}
                 className={`w-full px-4 py-2 text-left text-sm ${i === active ? 'bg-real/12 text-real' : ''}`}
               >
-                {c.name}
+                {countryName(c, lang)}
               </button>
             </li>
           ))}

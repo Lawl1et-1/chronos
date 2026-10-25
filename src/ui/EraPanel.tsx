@@ -3,6 +3,8 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { erasFor } from '../data/eras'
 import { YEAR_MAX, YEAR_MIN, formatRange, formatYear, tToYear, yearToT } from '../lib/time'
 import { selectedCountry, useChronos } from '../store/useChronos'
+import { countryName } from '../lib/countries'
+import { useLang, useT } from '../i18n'
 
 const SLIDER_STEPS = 2000
 
@@ -13,6 +15,8 @@ export function EraPanel() {
   const setYear = useChronos((s) => s.setYear)
   const backToZone = useChronos((s) => s.backToZone)
   const explore = useChronos((s) => s.explore)
+  const lang = useLang((s) => s.lang)
+  const t = useT()
   const eras = useMemo(() => (country ? erasFor(country) : []), [country])
 
   // free typing: keep a draft until it parses into a valid year
@@ -36,7 +40,7 @@ export function EraPanel() {
           exit={{ opacity: 0, x: 40 }}
           transition={{ duration: 0.6, delay: 0.5, ease: [0.2, 0.7, 0.2, 1] }}
         >
-          <p className="font-mono text-[10px] tracking-[0.3em] text-real uppercase">Époque · {country.name}</p>
+          <p className="font-mono text-[10px] tracking-[0.3em] text-real uppercase">{t('era.kicker', { zone: countryName(country, lang) })}</p>
 
           <div className="mt-2 flex items-baseline gap-3">
             <motion.span
@@ -47,11 +51,11 @@ export function EraPanel() {
             >
               {year < 0 ? -year : year}
             </motion.span>
-            {year < 0 && <span className="font-display text-xl text-parchment/70 italic">av. J.-C.</span>}
+            {year < 0 && <span className="font-display text-xl text-parchment/70 italic">{t('era.bc')}</span>}
           </div>
 
           <label className="sr-only" htmlFor="year-slider">
-            Année
+            {t('era.year')}
           </label>
           <input
             id="year-slider"
@@ -70,7 +74,7 @@ export function EraPanel() {
 
           <div className="mt-4 flex items-center gap-2">
             <label htmlFor="year-input" className="font-mono text-[10px] tracking-[0.2em] text-dust uppercase">
-              Année exacte
+              {t('era.exact')}
             </label>
             <input
               id="year-input"
@@ -84,17 +88,17 @@ export function EraPanel() {
               onKeyDown={(e) => e.key === 'Enter' && commitDraft()}
               className="w-24 rounded-md border border-parchment/15 bg-transparent px-2 py-1 font-mono text-sm tabular-nums focus:border-real/60 focus:outline-none"
             />
-            <span className="text-[11px] text-dust">négatif = av. J.-C.</span>
+            <span className="text-[11px] text-dust">{t('era.negative')}</span>
           </div>
 
           <div className="my-4 h-px shrink-0 bg-gradient-to-r from-real/40 via-parchment/10 to-transparent" />
 
-          <p className="font-mono text-[10px] tracking-[0.3em] text-dust uppercase">Époques suggérées</p>
+          <p className="font-mono text-[10px] tracking-[0.3em] text-dust uppercase">{t('era.suggested')}</p>
           <ul className="-mx-2 mt-2">
             {eras.map((era) => {
               const current = year >= era.start && year <= era.end
               return (
-                <li key={era.label}>
+                <li key={era.label.fr}>
                   <button
                     type="button"
                     onClick={() => setYear(era.focus)}
@@ -103,7 +107,7 @@ export function EraPanel() {
                       current ? 'text-alt' : ''
                     }`}
                   >
-                    <span className="text-sm">{era.label}</span>
+                    <span className="text-sm">{era.label[lang]}</span>
                     <span className="shrink-0 font-mono text-[10px] text-dust tabular-nums">
                       {formatRange(era.start, era.end)}
                     </span>
@@ -119,14 +123,14 @@ export function EraPanel() {
               onClick={explore}
               className="rounded-full bg-alt/90 px-5 py-2.5 font-mono text-xs tracking-[0.2em] text-void uppercase transition-colors hover:bg-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-alt"
             >
-              Explorer {formatYear(year)} →
+              {t('era.explore', { year: formatYear(year) })}
             </button>
             <button
               type="button"
               onClick={backToZone}
               className="rounded-full px-5 py-2 font-mono text-xs tracking-[0.2em] text-dust uppercase transition-colors hover:text-parchment focus-visible:outline-2 focus-visible:outline-real"
             >
-              ← Changer de zone <span className="opacity-50">(Échap)</span>
+              {t('era.back')} <span className="opacity-50">{t('common.esc')}</span>
             </button>
           </div>
         </motion.aside>

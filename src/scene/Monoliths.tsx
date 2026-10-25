@@ -4,6 +4,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 import type { KeyEvent } from '../../shared/schemas'
 import { latLonToVector3 } from '../lib/geo'
 import { FRACTURE_MS, selectedCountry, useChronos } from '../store/useChronos'
+import { useLang } from '../i18n'
 import { CARD_ASPECT, drawEventCard, drawPlaceholderCard, makeCardTexture } from './cardTexture'
 import { eventsDistance } from './framing'
 import { createFracture } from './fracture'
@@ -36,6 +37,7 @@ export function Monoliths() {
   const size = useThree((s) => s.size)
   const gl = useThree((s) => s.gl)
   const fracturing = useChronos((s) => s.fracturing)
+  const lang = useLang((s) => s.lang)
 
   const active = phase === 'events' && !fracturing
   const events: (KeyEvent | null)[] =
@@ -96,7 +98,7 @@ export function Monoliths() {
     return () => {
       alive = false
     }
-  }, [contentKey, cards])
+  }, [contentKey, cards, lang])
 
   // cards float in a row above the country, sized to fit the view
   const layout = useMemo<Layout | null>(() => {

@@ -1,10 +1,12 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { useChronos } from '../store/useChronos'
+import { useT, type MessageKey } from '../i18n'
 
-const STEPS = ['Zone', 'Époque', 'Événements', 'Divergence']
+const STEPS: MessageKey[] = ['step.zone', 'step.era', 'step.events', 'step.divergence']
 
 export function Hud() {
   const phase = useChronos((s) => s.phase)
+  const t = useT()
   if (phase === 'intro') return null
   const current = phase === 'alternate' ? 3 : phase === 'events' ? 2 : phase === 'era' ? 1 : 0
 
@@ -21,7 +23,7 @@ export function Hud() {
           {STEPS.map((s, i) => (
             <li key={s} className={i === current ? 'text-real' : 'text-dust/60'}>
               <span className="mr-1.5 opacity-60">{['I', 'II', 'III', 'IV'][i]}</span>
-              {s}
+              {t(s)}
             </li>
           ))}
         </ol>
@@ -37,13 +39,15 @@ export function Hud() {
             exit={{ opacity: 0 }}
             transition={{ delay: 1, duration: 0.8 }}
           >
-            {phase === 'globe'
-              ? 'Faites tourner le globe · survolez un pays · cliquez pour le choisir'
-              : phase === 'era'
-                ? 'Cliquez sur la spirale ou sur un repère pour choisir une année'
-                : phase === 'events'
-                  ? 'Survolez un monolithe pour le rapprocher · cliquez pour le détail'
-                  : 'Cliquez sur un jalon doré pour comparer avec la réalité'}
+            {t(
+              phase === 'globe'
+                ? 'hint.globe'
+                : phase === 'era'
+                  ? 'hint.era'
+                  : phase === 'events'
+                    ? 'hint.events'
+                    : 'hint.alternate',
+            )}
           </motion.p>
         )}
       </AnimatePresence>

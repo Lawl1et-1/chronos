@@ -1,14 +1,21 @@
 import type { Country } from '../lib/countries'
+import type { Lang } from '../i18n'
+import { ERAS_EN } from './erasEn'
 
 export interface Era {
-  label: string
+  label: Record<Lang, string>
   start: number
   end: number
   /** Year the spiral jumps to when the era is picked. */
   focus: number
 }
 
-const e = (label: string, start: number, end: number, focus = start): Era => ({ label, start, end, focus })
+const e = (fr: string, start: number, end: number, focus = start): Era => ({
+  label: { fr, en: ERAS_EN[fr] ?? fr },
+  start,
+  end,
+  focus,
+})
 
 /** Keyed by ISO 3166-1 numeric code, as used by world-atlas. */
 const BY_COUNTRY: Record<string, Era[]> = {

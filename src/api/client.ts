@@ -37,7 +37,7 @@ async function local<T>(run: (engine: Engine) => Promise<T>): Promise<T> {
   } catch (error) {
     if ((error as Error).name === 'AbortError') throw error
     if (error instanceof engine.LlmError) throw new ApiRequestError(error.message, error.code)
-    throw new ApiRequestError("Le service d'IA est injoignable.", 'network')
+    throw new ApiRequestError("Le service d'IA est injoignable.", 'engine')
   }
 }
 
@@ -108,6 +108,7 @@ export async function streamAlternateHistory(
     'alternate',
     req.zone.iso ?? req.zone.name,
     req.year,
+    req.lang,
     req.event.id,
     req.alteration.title.trim().toLowerCase(),
     req.alteration.description.trim().toLowerCase(),
@@ -207,7 +208,7 @@ async function fetchShare(id: string): Promise<SharePayload> {
 }
 
 export async function fetchKeyEvents(req: KeyEventsRequest, signal?: AbortSignal): Promise<KeyEventsResponse> {
-  const key = `key-events:${req.zone.iso ?? req.zone.name}:${req.year}`
+  const key = `key-events:${req.zone.iso ?? req.zone.name}:${req.year}:${req.lang}`
   const cached = readCache(key, KeyEventsResponseSchema)
   if (cached) return cached
   const data = STATIC_SITE

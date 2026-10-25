@@ -1,12 +1,15 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { formatLatLon } from '../lib/geo'
 import { selectedCountry, useChronos } from '../store/useChronos'
+import { countryName } from '../lib/countries'
+import { useT } from '../i18n'
 
 export function ZonePanel() {
   const country = useChronos(selectedCountry)
   const phase = useChronos((s) => s.phase)
   const clearSelection = useChronos((s) => s.clearSelection)
   const openEra = useChronos((s) => s.openEra)
+  const t = useT()
 
   return (
     <AnimatePresence mode="wait">
@@ -19,16 +22,13 @@ export function ZonePanel() {
           exit={{ opacity: 0, x: 40 }}
           transition={{ duration: 0.6, delay: 0.4, ease: [0.2, 0.7, 0.2, 1] }}
         >
-          <p className="font-mono text-[10px] tracking-[0.3em] text-alt uppercase">Zone sélectionnée</p>
-          <h2 className="mt-3 font-display text-4xl leading-tight font-medium">{country.name}</h2>
+          <p className="font-mono text-[10px] tracking-[0.3em] text-alt uppercase">{t('zone.kicker')}</p>
+          <h2 className="mt-3 font-display text-4xl leading-tight font-medium">{countryName(country)}</h2>
           <p className="mt-2 font-mono text-xs text-dust">{formatLatLon(country.center[0], country.center[1])}</p>
 
           <div className="my-6 h-px bg-gradient-to-r from-alt/50 via-parchment/10 to-transparent" />
 
-          <p className="text-sm leading-relaxed text-parchment/70">
-            Prochaine étape : choisir une époque sur la spirale du temps, puis découvrir les cinq événements qui l'ont
-            façonnée.
-          </p>
+          <p className="text-sm leading-relaxed text-parchment/70">{t('zone.next')}</p>
 
           <div className="mt-6 flex flex-col gap-2">
             <button
@@ -36,14 +36,14 @@ export function ZonePanel() {
               onClick={openEra}
               className="rounded-full bg-alt/90 px-5 py-2.5 font-mono text-xs tracking-[0.2em] text-void uppercase transition-colors hover:bg-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-alt"
             >
-              Choisir une époque →
+              {t('zone.chooseEra')}
             </button>
             <button
               type="button"
               onClick={clearSelection}
               className="rounded-full px-5 py-2.5 font-mono text-xs tracking-[0.2em] text-dust uppercase transition-colors hover:text-parchment focus-visible:outline-2 focus-visible:outline-real"
             >
-              ← Retour au globe <span className="opacity-50">(Échap)</span>
+              {t('zone.back')} <span className="opacity-50">{t('common.esc')}</span>
             </button>
           </div>
         </motion.aside>

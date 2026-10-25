@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { useChronos } from '../store/useChronos'
 import { STATIC_SITE } from '../api/client'
+import { useT } from '../i18n'
 
 const LETTERS = 'CHRONOS'.split('')
 
@@ -11,6 +12,7 @@ export function TitleScreen() {
   const share = useChronos((s) => s.pendingShare)
   const shareError = useChronos((s) => s.shareError)
   const hasKey = useChronos((s) => !!s.geminiKey)
+  const t = useT()
   const sharedBranch = share?.branches.find((b) => b.id === share.activeBranch) ?? share?.branches[0]
 
   return (
@@ -32,7 +34,7 @@ export function TitleScreen() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 1 }}
           >
-            Simulateur d'histoire alternative
+            {t('title.kicker')}
           </motion.p>
 
           <h1 className="mt-5 flex font-display text-[clamp(4rem,13vw,10rem)] leading-none font-medium tracking-[0.12em]">
@@ -55,7 +57,7 @@ export function TitleScreen() {
             animate={{ opacity: 1 }}
             transition={{ delay: 1.5, duration: 1.2 }}
           >
-            Choisissez un lieu, une époque, un événement. Puis changez-le.
+            {t('title.tagline')}
           </motion.p>
 
           {sharedBranch && share && (
@@ -66,10 +68,10 @@ export function TitleScreen() {
               transition={{ delay: 1.8, duration: 0.8 }}
             >
               <p className="font-mono text-[10px] tracking-[0.3em] text-alt uppercase">
-                Chronologie partagée · {share.zone.name}
+                {t('title.shared', { zone: share.zone.name })}
               </p>
               <p className="mt-1.5 font-display text-xl leading-snug">{sharedBranch.alteration.title}</p>
-              <p className="mt-1 text-xs text-dust">À partir de : {sharedBranch.event.title}</p>
+              <p className="mt-1 text-xs text-dust">{t('title.sharedFrom', { event: sharedBranch.event.title })}</p>
             </motion.div>
           )}
           {STATIC_SITE && !hasKey && !share && ready && (
@@ -79,8 +81,7 @@ export function TitleScreen() {
               animate={{ opacity: 1 }}
               transition={{ delay: 2.4, duration: 0.8 }}
             >
-              Démonstration sans clé. Pour explorer n'importe quelle zone, ajoutez ensuite votre clé Gemini
-              gratuite (bouton « Mode démo »).
+              {t('title.demoHint')}
             </motion.p>
           )}
           {shareError && (
@@ -98,7 +99,7 @@ export function TitleScreen() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 2, duration: 0.8 }}
           >
-            {!ready ? 'Chargement…' : share ? 'Ouvrir la chronologie' : 'Entrer'}
+            {!ready ? t('title.loading') : share ? t('title.openShared') : t('title.enter')}
           </motion.button>
         </motion.section>
       )}

@@ -14,6 +14,7 @@ import {
   type Branch,
 } from '../store/useChronos'
 import { ShareButton } from './ShareButton'
+import { useT } from '../i18n'
 
 const ghostButton =
   'rounded-full px-5 py-2 font-mono text-xs tracking-[0.2em] text-dust uppercase transition-colors hover:text-parchment focus-visible:outline-2 focus-visible:outline-real'
@@ -21,8 +22,9 @@ const heading = 'font-mono text-[10px] tracking-[0.3em] uppercase'
 
 function Confidence({ value }: { value: number }) {
   const pct = Math.round(value * 100)
+  const t = useT()
   return (
-    <span className="flex items-center gap-2" aria-label={`Confiance ${pct} %`}>
+    <span className="flex items-center gap-2" aria-label={t('alt.confidence', { pct })}>
       <span className="relative h-1 w-16 overflow-hidden rounded-full bg-parchment/10">
         <span className="absolute inset-y-0 left-0 rounded-full bg-alt" style={{ width: `${pct}%` }} />
       </span>
@@ -35,10 +37,11 @@ function Confidence({ value }: { value: number }) {
 function Breadcrumb({ branch }: { branch: Branch }) {
   const branches = useChronos((s) => s.branches)
   const setActiveBranch = useChronos((s) => s.setActiveBranch)
+  const t = useT()
   const path = branchPath(branches, branch)
   if (path.length < 2) return null
   return (
-    <nav aria-label="Branches" className="mt-3 flex flex-wrap items-center gap-1 font-mono text-[10px] text-dust">
+    <nav aria-label={t('alt.branchesNav')} className="mt-3 flex flex-wrap items-center gap-1 font-mono text-[10px] text-dust">
       {path.map((b, i) => (
         <span key={b.id} className="flex items-center gap-1">
           {i > 0 && <span aria-hidden>›</span>}
@@ -62,6 +65,7 @@ export function AlternatePanel() {
   const branches = useChronos((s) => s.branches)
   const selectedNode = useChronos((s) => s.selectedNode)
   const { selectNode, back, loadBranch, clearSelection, setComparing, setActiveBranch } = useChronos.getState()
+  const t = useT()
 
   const content = branch ? branchContent(branch) : null
   const nodes = content?.timeline ?? []
@@ -82,7 +86,8 @@ export function AlternatePanel() {
           className="glass pointer-events-auto absolute right-4 bottom-4 left-4 flex max-h-[48vh] flex-col overflow-y-auto rounded-2xl p-5 sm:top-1/2 sm:right-8 sm:bottom-auto sm:left-auto sm:max-h-[86vh] sm:w-[25rem] sm:-translate-y-1/2 sm:p-6"
         >
           <p className="self-start rounded-full border border-rupture/50 px-2.5 py-0.5 font-mono text-[9px] tracking-[0.25em] text-rupture uppercase">
-            Chronologie spéculative{data?.demo ? ' · démo' : ''}
+            {t('alt.speculative')}
+            {data?.demo ? t('alt.demoSuffix') : ''}
           </p>
           <Breadcrumb branch={branch} />
 
@@ -97,7 +102,7 @@ export function AlternatePanel() {
           ) : (
             <>
               <p className={`${heading} mt-4 text-alt`}>
-                {branch.parentId ? `Et si, en ${formatYear(branch.event.year)}…` : 'Et si…'}
+                {branch.parentId ? t('alt.whatIfIn', { year: formatYear(branch.event.year) }) : t('alt.whatIf')}
               </p>
               <h2 className="mt-1 font-display text-3xl leading-tight font-medium">{branch.alteration.title}</h2>
 
@@ -105,10 +110,12 @@ export function AlternatePanel() {
                 <div className="mt-4" aria-live="polite">
                   <p className="text-sm text-parchment/70">
                     {nodes.length
-                      ? `Reconstruction de la chronologie… ${nodes.length} jalon${nodes.length > 1 ? 's' : ''}`
+                      ? nodes.length === 1
+                        ? t('alt.streamingNode')
+                        : t('alt.streamingNodes', { count: nodes.length })
                       : content?.divergencePoint
-                        ? 'Enchaînement des causes et des conséquences…'
-                        : "L'IA raisonne sur les contraintes de l'époque…"}
+                        ? t('alt.streamingLinks')
+                        : t('alt.streamingStart')}
                   </p>
                   <div className="relative mt-2 h-px overflow-hidden bg-parchment/10">
                     <motion.div
@@ -128,7 +135,7 @@ export function AlternatePanel() {
                     onClick={() => void loadBranch(branch.id)}
                     className="mt-3 rounded-full bg-alt/90 px-5 py-2 font-mono text-xs tracking-[0.2em] text-void uppercase hover:bg-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-alt"
                   >
-                    Réessayer
+                    {t('common.retry')}
                   </button>
                 </div>
               )}
@@ -140,7 +147,7 @@ export function AlternatePanel() {
                     onClick={() => setComparing(true)}
                     className="rounded-full bg-real/90 px-4 py-2 font-mono text-[11px] tracking-[0.2em] text-void uppercase transition-colors hover:bg-real focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-real"
                   >
-                    Comparer à la réalité
+                    {t('alt.compare')}
                   </button>
                   <ShareButton />
                 </div>
@@ -149,7 +156,7 @@ export function AlternatePanel() {
               {content?.divergencePoint && (
                 <section className="mt-5">
                   <h3 className={`${heading} text-rupture`}>
-                    Point de divergence · {formatYear(content.divergencePoint.year)}
+                    {t('alt.divergence', { year: formatYear(content.divergencePoint.year) })}
                   </h3>
                   <p className="mt-1.5 text-sm font-medium">{content.divergencePoint.title}</p>
                   <p className="mt-1 text-sm leading-relaxed text-parchment/75">{content.divergencePoint.description}</p>
@@ -158,7 +165,7 @@ export function AlternatePanel() {
 
               {content?.butterflyEffects && (
                 <section className="mt-5">
-                  <h3 className={`${heading} text-dust`}>Effet papillon</h3>
+                  <h3 className={`${heading} text-dust`}>{t('alt.butterfly')}</h3>
                   <ol className="mt-2 flex flex-col">
                     {content.butterflyEffects.map((link, i) => (
                       <li key={i} className="relative border-l border-alt/30 pb-3 pl-4 last:pb-0">
@@ -173,7 +180,7 @@ export function AlternatePanel() {
 
               {nodes.length > 0 && (
                 <section className="mt-5">
-                  <h3 className={`${heading} text-dust`}>Jalons de la branche</h3>
+                  <h3 className={`${heading} text-dust`}>{t('alt.milestones')}</h3>
                   <ol className="-mx-2 mt-2">
                     {nodes.map((n, i) => {
                       const forks = children.filter((c) => c.forkNode === i)
@@ -189,7 +196,7 @@ export function AlternatePanel() {
                             </span>
                             <span className="min-w-0 flex-1 text-sm leading-snug">{n.title}</span>
                             {forks.length > 0 && (
-                              <span className="shrink-0 font-mono text-[10px] text-branch" title="Sous-branches">
+                              <span className="shrink-0 font-mono text-[10px] text-branch" title={t('alt.forks')}>
                                 ⑂ {forks.length}
                               </span>
                             )}
@@ -204,11 +211,11 @@ export function AlternatePanel() {
               {data && (
                 <>
                   <section className="mt-5">
-                    <h3 className={`${heading} text-alt`}>Le monde en 2025</h3>
+                    <h3 className={`${heading} text-alt`}>{t('alt.world2025')}</h3>
                     <p className="mt-1.5 text-sm leading-relaxed text-parchment/80">{data.worldIn2025}</p>
                   </section>
                   <section className="mt-5 rounded-lg border border-parchment/10 p-3">
-                    <h3 className={`${heading} text-dust`}>Plausibilité</h3>
+                    <h3 className={`${heading} text-dust`}>{t('alt.plausibility')}</h3>
                     <p className="mt-1.5 text-xs leading-relaxed text-parchment/70">{data.plausibilityNote}</p>
                   </section>
                 </>
@@ -216,7 +223,7 @@ export function AlternatePanel() {
 
               {children.length > 0 && (
                 <section className="mt-5">
-                  <h3 className={`${heading} text-branch`}>Sous-branches</h3>
+                  <h3 className={`${heading} text-branch`}>{t('alt.forks')}</h3>
                   <ul className="-mx-2 mt-2">
                     {children.map((c) => (
                       <li key={c.id}>
@@ -237,15 +244,14 @@ export function AlternatePanel() {
               )}
 
               <p className="mt-5 text-[11px] leading-relaxed text-dust">
-                Scénario hypothétique généré par IA. Les comparaisons « dans la réalité » s'appuient sur des faits ;
-                tout le reste est spéculatif.
+                {t('alt.disclaimer')}
               </p>
               <div className="mt-3 flex flex-wrap gap-x-2">
                 <button type="button" onClick={back} className={`${ghostButton} px-0`}>
-                  {branch.parentId ? '← Branche parente' : '← Autre modification'}
+                  {branch.parentId ? t('alt.parent') : t('alt.otherAlteration')}
                 </button>
                 <button type="button" onClick={clearSelection} className={ghostButton}>
-                  Nouvelle zone
+                  {t('alt.newZone')}
                 </button>
               </div>
             </>
@@ -271,6 +277,7 @@ function NodeDetail({
 }) {
   const branches = useChronos((s) => s.branches)
   const canFork = branch.status === 'ready' && branchDepth(branches, branch) < MAX_DEPTH
+  const t = useT()
   return (
     <>
       <div className="mt-4 flex items-baseline justify-between gap-3">
@@ -283,13 +290,13 @@ function NodeDetail({
       <p className="mt-3 text-sm leading-relaxed text-parchment/85">{node.description}</p>
 
       <section className="mt-4 rounded-lg border border-real/30 bg-real/5 p-3">
-        <h3 className={`${heading} text-real`}>Dans la réalité</h3>
+        <h3 className={`${heading} text-real`}>{t('alt.inReality')}</h3>
         <p className="mt-1.5 text-sm leading-relaxed text-parchment/80">{node.realHistoryComparison}</p>
       </section>
 
       {node.affectedRegions.length > 0 && (
         <section className="mt-4">
-          <h3 className={`${heading} text-dust`}>Régions concernées</h3>
+          <h3 className={`${heading} text-dust`}>{t('alt.regions')}</h3>
           <ul className="mt-2 flex flex-wrap gap-1.5">
             {node.affectedRegions.map((r) => (
               <li key={r.name} className="rounded-full border border-rupture/40 px-2.5 py-0.5 text-xs text-parchment/85">
@@ -309,7 +316,7 @@ function NodeDetail({
           onClick={() => onSelect(index - 1)}
           className={`${ghostButton} px-0 disabled:opacity-30`}
         >
-          ← Précédent
+          {t('alt.prev')}
         </button>
         <span className="font-mono text-[10px] text-dust">
           {index + 1} / {count}
@@ -320,11 +327,11 @@ function NodeDetail({
           onClick={() => onSelect(index + 1)}
           className={`${ghostButton} px-0 disabled:opacity-30`}
         >
-          Suivant →
+          {t('alt.next')}
         </button>
       </div>
       <button type="button" onClick={() => onSelect(null)} className={`${ghostButton} mt-2 self-start px-0`}>
-        ← Vue d'ensemble <span className="opacity-50">(Échap)</span>
+        {t('alt.overview')} <span className="opacity-50">{t('common.esc')}</span>
       </button>
     </>
   )
@@ -335,10 +342,11 @@ function ForkForm({ node, index }: { node: TimelineNode; index: number }) {
   const forkBranch = useChronos((s) => s.forkBranch)
   const [open, setOpen] = useState(false)
   const [text, setText] = useState('')
+  const t = useT()
   const suggestions = [
-    `Et si « ${node.title} » n'avait pas eu lieu ?`,
-    `Et si « ${node.title} » avait échoué ?`,
-    `Et si « ${node.title} » était survenu dix ans plus tôt ?`,
+    t('alt.forkNotHappened', { title: node.title }),
+    t('alt.forkFailed', { title: node.title }),
+    t('alt.forkEarlier', { title: node.title }),
   ]
   const fork = (title: string) => forkBranch(index, { title: title.slice(0, 300), description: '' })
 
@@ -349,13 +357,13 @@ function ForkForm({ node, index }: { node: TimelineNode; index: number }) {
         onClick={() => setOpen(true)}
         className="mt-5 self-start rounded-full border border-branch/40 px-4 py-2 font-mono text-[11px] tracking-[0.2em] text-branch uppercase transition-colors hover:bg-branch/10 focus-visible:outline-2 focus-visible:outline-branch"
       >
-        ⑂ Modifier ce jalon
+        {t('alt.forkButton')}
       </button>
     )
   }
   return (
     <section className="mt-5 rounded-lg border border-branch/30 p-3">
-      <h3 className={`${heading} text-branch`}>Nouvelle sous-branche</h3>
+      <h3 className={`${heading} text-branch`}>{t('alt.forkTitle')}</h3>
       <div className="mt-2 flex flex-col gap-1.5">
         {suggestions.map((s) => (
           <button
@@ -376,14 +384,14 @@ function ForkForm({ node, index }: { node: TimelineNode; index: number }) {
         }}
       >
         <label className="sr-only" htmlFor="fork-text">
-          Votre hypothèse
+          {t('alt.forkOwnLabel')}
         </label>
         <input
           id="fork-text"
           value={text}
           maxLength={300}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Ou votre propre hypothèse…"
+          placeholder={t('alt.forkOwn')}
           className="min-w-0 flex-1 rounded-md border border-parchment/15 bg-transparent px-2.5 py-1.5 text-xs placeholder:text-dust/70 focus:border-branch/60 focus:outline-none"
         />
         <button
@@ -391,7 +399,7 @@ function ForkForm({ node, index }: { node: TimelineNode; index: number }) {
           disabled={text.trim().length < 3}
           className="rounded-md bg-branch/90 px-3 font-mono text-[10px] tracking-[0.15em] text-void uppercase disabled:opacity-40"
         >
-          Créer
+          {t('alt.forkCreate')}
         </button>
       </form>
     </section>

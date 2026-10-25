@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { translate } from '../i18n'
 
 export const YEAR_MIN = -3000
 export const YEAR_MAX = 2020
@@ -46,12 +47,12 @@ export function tToYear(t: number) {
 }
 
 export function formatYear(year: number) {
-  return year < 0 ? `${-year} av. J.-C.` : String(year)
+  return year < 0 ? `${-year} ${translate('era.bc')}` : String(year)
 }
 
 export function formatRange(start: number, end: number) {
   if (start === end) return formatYear(start)
-  if (start < 0 && end < 0) return `${-start}–${-end} av. J.-C.`
+  if (start < 0 && end < 0) return `${-start}–${-end} ${translate('era.bc')}`
   return `${formatYear(start)} – ${formatYear(end)}`
 }
 

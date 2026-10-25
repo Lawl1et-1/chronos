@@ -4,6 +4,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { Html } from '@react-three/drei'
 import type { TimelineNode } from '../../shared/schemas'
 import { hiddenByGlobe } from '../lib/geo'
+import { useT } from '../i18n'
 import { formatYear } from '../lib/time'
 import { branchContent, branchLabel, selectedCountry, useChronos, type Branch } from '../store/useChronos'
 import {
@@ -118,6 +119,7 @@ export function TimelineBranch() {
   const activeBranch = useChronos((s) => s.activeBranch)
   const selectedNode = useChronos((s) => s.selectedNode)
   const [hovered, setHovered] = useState<{ branch: string; index: number } | null>(null)
+  const t = useT()
 
   const active = phase === 'alternate'
   const root = branches[0]
@@ -344,7 +346,7 @@ export function TimelineBranch() {
           {...label('real', 0, divergencePos)}
           className="pointer-events-none translate-y-6 -translate-x-10 text-center whitespace-nowrap select-none"
         >
-          <span className="font-mono text-[10px] tracking-[0.2em] text-rupture uppercase">Point de divergence</span>
+          <span className="font-mono text-[10px] tracking-[0.2em] text-rupture uppercase">{t('scene.divergence')}</span>
         </div>
       </Html>
 
@@ -367,7 +369,7 @@ export function TimelineBranch() {
           {...label('real', 1, realEnd)}
           className="pointer-events-none translate-x-14 font-mono text-[10px] tracking-[0.2em] whitespace-nowrap text-real uppercase select-none"
         >
-          Histoire réelle
+          {t('scene.real')}
         </div>
       </Html>
 
@@ -417,9 +419,9 @@ export function TimelineBranch() {
                   b.branch.parentId ? 'translate-x-16 text-branch' : '-translate-y-9 text-alt'
                 }`}
               >
-                {b.branch.parentId ? branchLabel(b.branch.id) : 'Chronologie alternative'}
+                {b.branch.parentId ? branchLabel(b.branch.id) : t('scene.alternate')}
                 {!b.branch.parentId && (
-                  <span className="block text-[9px] tracking-normal text-dust normal-case">spéculative</span>
+                  <span className="block text-[9px] tracking-normal text-dust normal-case">{t('scene.speculative')}</span>
                 )}
               </div>
             </Html>

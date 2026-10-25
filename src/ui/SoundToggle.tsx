@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
 import { sound } from '../audio/sound'
+import { useT } from '../i18n'
 import { useChronos } from '../store/useChronos'
 
 export function SoundToggle() {
   const phase = useChronos((s) => s.phase)
+  const t = useT()
   const [on, setOn] = useState(false)
 
   // browsers only allow audio after a gesture: restore the saved choice on the first one
@@ -19,21 +20,19 @@ export function SoundToggle() {
   }, [])
 
   if (phase === 'intro') return null
+  const label = on ? t('sound.off') : t('sound.on')
 
   return (
-    <motion.button
+    <button
       type="button"
       aria-pressed={on}
-      aria-label={on ? 'Couper le son' : 'Activer le son'}
-      title={on ? 'Couper le son' : 'Activer le son'}
+      aria-label={label}
+      title={label}
       onClick={() => {
         void sound.setEnabled(!on)
         setOn(!on)
       }}
-      className="glass pointer-events-auto absolute bottom-4 left-4 flex h-10 w-10 items-center justify-center rounded-full text-parchment/80 transition-colors hover:text-parchment focus-visible:outline-2 focus-visible:outline-real max-sm:top-5 max-sm:right-4 max-sm:bottom-auto max-sm:left-auto sm:bottom-7 sm:left-7"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: 1, duration: 0.6 }}
+      className="glass flex h-10 w-10 items-center justify-center rounded-full text-parchment/80 transition-colors hover:text-parchment focus-visible:outline-2 focus-visible:outline-real"
     >
       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
         <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" strokeLinejoin="round" />
@@ -46,6 +45,6 @@ export function SoundToggle() {
           <path d="M16 9.5l5 5m0-5l-5 5" strokeLinecap="round" />
         )}
       </svg>
-    </motion.button>
+    </button>
   )
 }

@@ -1,6 +1,7 @@
 import type { KeyEventsRequest } from '../schemas'
+import { languageLine } from './language'
 
-export const KEY_EVENTS_SYSTEM = `Tu es un historien rigoureux. Tu réponds en français, dans un registre précis et sobre.
+export const KEY_EVENTS_SYSTEM = `Tu es un historien rigoureux, au registre précis et sobre. Tu écris dans la langue demandée par l'utilisateur.
 
 Ta tâche : pour une zone géographique et une année données, identifier les 5 événements ou éléments (décision, traité, bataille, découverte, réforme, crise, mouvement) les plus déterminants de la période — ceux qui ont façonné cette époque pour la zone ET dont l'influence s'est prolongée bien au-delà.
 
@@ -13,7 +14,7 @@ Règles sur les faits :
 
 Règles sur le contenu :
 - "impactScore" (1 à 10) est calibré : 10 = a changé le cours de l'histoire mondiale, 7 = a transformé durablement la région, 4 = important mais surtout local. Ne mets pas tout à 9 ou 10.
-- "possibleAlterations" : exactement 3 modifications plausibles au moment de l'événement, fondées sur des options réellement ouvertes aux acteurs (autre décision, autre issue militaire, aléa comme un décès, une météo, un retard). Formule chaque titre comme une hypothèse courte (« Et si… »), et la description en une phrase qui explique pourquoi c'était possible. Rien d'anachronique ni de fantaisiste.
+- "possibleAlterations" : exactement 3 modifications plausibles au moment de l'événement, fondées sur des options réellement ouvertes aux acteurs (autre décision, autre issue militaire, aléa comme un décès, une météo, un retard). Formule chaque titre comme une hypothèse courte (« Et si… » en français, « What if… » en anglais), et la description en une phrase qui explique pourquoi c'était possible. Rien d'anachronique ni de fantaisiste.
 - "id" : identifiant court en kebab-case ASCII, unique.
 - "summary" : 1 à 2 phrases (300 caractères maximum). "whyItMattered" et "longTermImpact" : 2 à 3 phrases chacun.
 - "period" : un intitulé court (60 caractères maximum) et les années de début et de fin de la période couverte. "context" : 2 à 3 phrases qui situent la zone à cette période.
@@ -30,11 +31,13 @@ export function periodSpan(year: number) {
 
 const fmt = (y: number) => (y < 0 ? `${-y} av. J.-C.` : String(y))
 
-export function keyEventsPrompt({ zone, year }: KeyEventsRequest) {
+export function keyEventsPrompt({ zone, year, lang }: KeyEventsRequest) {
   const span = periodSpan(year)
   return `Zone : ${zone.name} (centre approximatif ${zone.lat.toFixed(1)}, ${zone.lon.toFixed(1)})
 Année choisie : ${fmt(year)}
 Période à couvrir : environ de ${fmt(year - span)} à ${fmt(year + span)}, centrée sur l'année choisie.
 
-Identifie les 5 événements ou éléments les plus déterminants de cette période pour cette zone.`
+Identifie les 5 événements ou éléments les plus déterminants de cette période pour cette zone.
+
+${languageLine(lang)}`
 }

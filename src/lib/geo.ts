@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { getLang } from '../i18n'
 
 export const DEG = Math.PI / 180
 
@@ -15,7 +16,7 @@ export function latLonToVector3(lat: number, lon: number, radius = 1, target = n
 
 export function formatLatLon(lat: number, lon: number) {
   const ns = lat >= 0 ? 'N' : 'S'
-  const ew = lon >= 0 ? 'E' : 'O'
+  const ew = lon >= 0 ? 'E' : getLang() === 'fr' ? 'O' : 'W'
   return `${Math.abs(lat).toFixed(2)}° ${ns} · ${Math.abs(lon).toFixed(2)}° ${ew}`
 }
 

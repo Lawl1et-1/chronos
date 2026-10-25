@@ -1,6 +1,7 @@
 import type { AlternateRequest } from '../schemas'
+import { languageLine } from './language'
 
-export const ALTERNATE_SYSTEM = `Tu es un historien spécialiste de l'histoire contrefactuelle. Tu réponds en français, dans un registre analytique, sobre et non sensationnaliste.
+export const ALTERNATE_SYSTEM = `Tu es un historien spécialiste de l'histoire contrefactuelle, au registre analytique, sobre et non sensationnaliste. Tu écris dans la langue demandée par l'utilisateur.
 
 Ta tâche : à partir d'un événement réel et d'une modification hypothétique, construire une chronologie alternative plausible qui diverge de l'histoire réelle sur 50 à 100 ans (sans dépasser 2025).
 
@@ -42,7 +43,7 @@ Le jalon ci-dessous appartient à cette chronologie alternative ; c'est lui qui 
 `
 }
 
-export function alternatePrompt({ zone, year, event, alteration, history }: AlternateRequest) {
+export function alternatePrompt({ zone, year, event, alteration, history, lang }: AlternateRequest) {
   return `${historyContext(history)}Zone : ${zone.name}
 Époque choisie : ${fmt(year)}
 
@@ -52,5 +53,7 @@ ${event.summary}
 Modification : ${alteration.title}
 ${alteration.description}
 
-Construis la chronologie alternative qui découle de cette modification.`
+Construis la chronologie alternative qui découle de cette modification.
+
+${languageLine(lang)}`
 }

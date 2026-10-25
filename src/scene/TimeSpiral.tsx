@@ -6,6 +6,7 @@ import { erasFor } from '../data/eras'
 import { hiddenByGlobe, latLonToVector3 } from '../lib/geo'
 import { formatYear, helixAngle, helixPoint, tToYear, yearToT } from '../lib/time'
 import { selectedCountry, useChronos } from '../store/useChronos'
+import { useLang } from '../i18n'
 import { spiralFragment, spiralVertex } from './shaders/spiral'
 
 const SEGMENTS = 900
@@ -53,6 +54,7 @@ export function TimeSpiral() {
   const year = useChronos((s) => s.year)
   const setYear = useChronos((s) => s.setYear)
   const eras = useMemo(() => (country ? erasFor(country) : []), [country])
+  const lang = useLang((s) => s.lang)
   const [hoveredEra, setHoveredEra] = useState(-1)
 
   const group = useRef<THREE.Group>(null)
@@ -189,7 +191,7 @@ export function TimeSpiral() {
           const current = year >= era.start && year <= era.end
           const hover = hoveredEra === i
           return (
-            <group key={era.label} position={p}>
+            <group key={era.label.fr} position={p}>
               <mesh
                 scale={hover || current ? 1.6 : 1}
                 onClick={(e) => {
@@ -220,7 +222,7 @@ export function TimeSpiral() {
                   }`}
                   style={{ opacity: 0 }}
                 >
-                  {era.label}
+                  {era.label[lang]}
                 </div>
               </Html>
             </group>

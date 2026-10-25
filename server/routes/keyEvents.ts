@@ -8,7 +8,7 @@ import {
 } from '../../shared/schemas'
 import { ResultCache } from '../cache'
 import { generateStructured, LlmError, providerId } from '../llm'
-import { DEMO_KEY_EVENTS } from '../../shared/demo/keyEvents'
+import { demoKeyEvents } from '../../shared/demo'
 import { KEY_EVENTS_SYSTEM, keyEventsPrompt } from '../../shared/prompts/keyEvents'
 
 const cache = new ResultCache<KeyEventsResponse>()
@@ -22,11 +22,11 @@ export async function keyEventsRoute(req: Request, res: Response) {
   const input = parsed.data
 
   if (process.env.CHRONOS_MOCK === '1') {
-    res.json(DEMO_KEY_EVENTS)
+    res.json(demoKeyEvents(input.lang))
     return
   }
 
-  const key = `${providerId()}|${input.zone.iso ?? input.zone.name}|${input.year}`
+  const key = `${providerId()}|${input.zone.iso ?? input.zone.name}|${input.year}|${input.lang}`
   try {
     const result = await cache.get(key, async () => {
       const started = Date.now()

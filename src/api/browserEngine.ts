@@ -14,8 +14,7 @@ import {
   type KeyEventsRequest,
   type KeyEventsResponse,
 } from '../../shared/schemas'
-import { DEMO_KEY_EVENTS } from '../../shared/demo/keyEvents'
-import { DEMO_ALTERNATE, DEMO_SUB_BRANCH } from '../../shared/demo/alternateHistory'
+import { demoAlternate, demoKeyEvents } from '../../shared/demo'
 import { KEY_EVENTS_SYSTEM, keyEventsPrompt } from '../../shared/prompts/keyEvents'
 import { ALTERNATE_SYSTEM, alternatePrompt } from '../../shared/prompts/alternateHistory'
 import { geminiProvider } from '../../shared/llm/gemini'
@@ -41,7 +40,7 @@ const sleep = (ms: number, signal?: AbortSignal) =>
 export async function keyEvents(req: KeyEventsRequest, key: string | null, signal?: AbortSignal) {
   if (!key) {
     await sleep(900, signal)
-    return DEMO_KEY_EVENTS
+    return demoKeyEvents(req.lang)
   }
   const data = await generateStructured(provider(key), {
     system: KEY_EVENTS_SYSTEM,
@@ -66,7 +65,7 @@ export async function alternateHistory(
 ): Promise<AlternateResponse> {
   if (!key) {
     // replay the demo scenario at a reading pace
-    const demo = req.history?.length ? DEMO_SUB_BRANCH : DEMO_ALTERNATE
+    const demo = demoAlternate(req.lang, !!req.history?.length)
     const { divergencePoint, butterflyEffects, timeline } = demo
     await sleep(900, signal)
     onPartial({ divergencePoint, timeline: [] })

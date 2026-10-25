@@ -9,7 +9,7 @@ import {
 import { completedParts, partialSignature } from '../../shared/partial'
 import { ResultCache } from '../cache'
 import { LlmError, providerId, streamStructured } from '../llm'
-import { DEMO_ALTERNATE, DEMO_SUB_BRANCH } from '../../shared/demo/alternateHistory'
+import { demoAlternate } from '../../shared/demo'
 import { ALTERNATE_SYSTEM, alternatePrompt } from '../../shared/prompts/alternateHistory'
 
 const cache = new ResultCache<AlternateResponse>(100)
@@ -59,7 +59,7 @@ export async function alternateHistoryRoute(req: Request, res: Response) {
 
   try {
     if (process.env.CHRONOS_MOCK === '1') {
-      await streamDemo(send, controller.signal, input.history?.length ? DEMO_SUB_BRANCH : DEMO_ALTERNATE)
+      await streamDemo(send, controller.signal, demoAlternate(input.lang, !!input.history?.length))
       return
     }
 
@@ -67,6 +67,7 @@ export async function alternateHistoryRoute(req: Request, res: Response) {
       providerId(),
       input.zone.iso ?? input.zone.name,
       input.year,
+      input.lang,
       input.event.id,
       input.alteration.title.trim().toLowerCase(),
       input.alteration.description.trim().toLowerCase(),

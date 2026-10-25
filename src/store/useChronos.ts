@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Country } from '../lib/countries'
+import { countryName, type Country } from '../lib/countries'
 import type {
   Alteration,
   AlternatePartial,
@@ -12,6 +12,7 @@ import { erasFor } from '../data/eras'
 import { clampYear, formatYear } from '../lib/time'
 import { ApiRequestError, STATIC_SITE, fetchKeyEvents, streamAlternateHistory } from '../api/client'
 import { readGeminiKey, writeGeminiKey } from '../lib/geminiKey'
+import { errorText, getLang, translate, useLang } from '../i18n'
 
 export type Phase = 'intro' | 'globe' | 'zone' | 'era' | 'events' | 'alternate'
 
@@ -155,7 +156,7 @@ export const useChronos = create<ChronosState>((set, get) => {
       // open a shared timeline directly
       const country =
         get().countries.find((c) => share.zone.iso && c.iso === share.zone.iso) ??
-        get().countries.find((c) => c.name === share.zone.name)
+        get().countries.find((c) => Object.values(c.names).includes(share.zone.name))
       if (!country) return set({ phase: 'globe', pendingShare: null })
       set({
         pendingShare: null,
@@ -190,7 +191,7 @@ export const useChronos = create<ChronosState>((set, get) => {
       const { selected, countries, year, keyEvents } = get()
       const country = countries[selected - 1]
       if (!country) return
-      const key = `${country.index}:${year}:${STATIC_SITE && !get().geminiKey ? 'demo' : 'live'}`
+      const key = `${country.index}:${year}:${getLang()}:${STATIC_SITE && !get().geminiKey ? 'demo' : 'live'}`
       if (keyEvents.status !== 'idle' && keyEvents.status !== 'error' && keyEvents.key === key) return
 
       inFlight?.abort()
@@ -198,7 +199,11 @@ export const useChronos = create<ChronosState>((set, get) => {
       set({ keyEvents: { status: 'loading', key } })
       try {
         const data = await fetchKeyEvents(
-          { zone: { name: country.name, iso: country.iso, lat: country.center[0], lon: country.center[1] }, year },
+          {
+            zone: { name: countryName(country), iso: country.iso, lat: country.center[0], lon: country.center[1] },
+            year,
+            lang: getLang(),
+          },
           controller.signal,
         )
         if (get().keyEvents.status === 'loading' && (get().keyEvents as { key: string }).key === key) {
@@ -206,7 +211,7 @@ export const useChronos = create<ChronosState>((set, get) => {
         }
       } catch (error) {
         if ((error as Error).name === 'AbortError') return
-        const message = error instanceof ApiRequestError ? error.message : 'Une erreur inattendue est survenue.'
+        const message = error instanceof ApiRequestError ? errorText(error.code, error.message) : translate('error.unexpected')
         set({ keyEvents: { status: 'error', key, message } })
       }
     },
@@ -279,6 +284,7 @@ export const useChronos = create<ChronosState>((set, get) => {
           {
             zone: keyEvents.data.zone,
             year: keyEvents.data.year,
+            lang: getLang(),
             event: branch.event,
             alteration: branch.alteration,
             history: historyFor(get().branches, branch),
@@ -292,7 +298,7 @@ export const useChronos = create<ChronosState>((set, get) => {
         if (current()) patchBranch(id, { status: 'ready', data, partial: null })
       } catch (error) {
         if ((error as Error).name === 'AbortError' || !current()) return
-        const message = error instanceof ApiRequestError ? error.message : 'Une erreur inattendue est survenue.'
+        const message = error instanceof ApiRequestError ? errorText(error.code, error.message) : translate('error.unexpected')
         patchBranch(id, { status: 'error', message })
       } finally {
         if (branchControllers.get(id) === controller) branchControllers.delete(id)
@@ -334,10 +340,19 @@ export const useChronos = create<ChronosState>((set, get) => {
   }
 })
 
+useLang.subscribe((s, prev) => {
+  if (s.lang === prev.lang) return
+  const { keyEvents, phase, loadKeyEvents } = useChronos.getState()
+  if (keyEvents.status === 'ready' && keyEvents.data.demo) {
+    useChronos.setState({ keyEvents: { status: 'idle' } })
+    if (phase === 'events' || phase === 'alternate') void loadKeyEvents()
+  }
+})
+
 export const selectedCountry = (s: ChronosState) => (s.selected ? s.countries[s.selected - 1] : undefined)
 export const hoveredCountry = (s: ChronosState) => (s.hovered ? s.countries[s.hovered - 1] : undefined)
 export const keyEventsData = (s: ChronosState) => (s.keyEvents.status === 'ready' ? s.keyEvents.data : null)
 export const activeBranchOf = (s: ChronosState) => findBranch(s.branches, s.activeBranch) ?? null
 
 /** "b1" → "Branche 1", "b1.2" → "Branche 1.2". */
-export const branchLabel = (id: string) => `Branche ${id.slice(1)}`
+export const branchLabel = (id: string) => translate('alt.branch', { id: id.slice(1) })

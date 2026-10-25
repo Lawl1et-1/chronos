@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import type { KeyEvent } from '../../shared/schemas'
+import { translate } from '../i18n'
 
 export const CARD_W = 600
 export const CARD_H = 840
@@ -117,7 +118,7 @@ export function drawEventCard(canvas: HTMLCanvasElement, event: KeyEvent, index:
   const base = CARD_H - PAD - 10
   ctx.font = '500 19px "IBM Plex Mono", monospace'
   ctx.fillStyle = 'rgba(143, 138, 126, 1)'
-  ctx.fillText('IMPACT HISTORIQUE', PAD, base - 34)
+  ctx.fillText(translate('card.impact'), PAD, base - 34)
   ctx.textAlign = 'right'
   ctx.fillStyle = 'rgba(232, 182, 90, 1)'
   ctx.fillText(`${event.impactScore}/10`, CARD_W - PAD, base - 34)

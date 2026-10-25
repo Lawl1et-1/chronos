@@ -4,10 +4,13 @@ import type { KeyEvent } from '../../shared/schemas'
 import { formatRange, formatYear } from '../lib/time'
 import { selectedCountry, useChronos } from '../store/useChronos'
 import { STATIC_SITE } from '../api/client'
+import { countryName } from '../lib/countries'
+import { useT } from '../i18n'
 
 function ImpactBar({ score }: { score: number }) {
+  const t = useT()
   return (
-    <span className="flex gap-[3px]" aria-label={`Impact historique ${score} sur 10`}>
+    <span className="flex gap-[3px]" aria-label={t('events.impact', { score })}>
       {Array.from({ length: 10 }, (_, i) => (
         <span key={i} className={`h-1.5 w-1.5 rounded-[1px] ${i < score ? 'bg-alt' : 'bg-parchment/12'}`} />
       ))}
@@ -33,6 +36,7 @@ export function EventsPanel() {
   const hoveredEvent = useChronos((s) => s.hoveredEvent)
   const selectedEvent = useChronos((s) => s.selectedEvent)
   const { hoverEvent, selectEvent, loadKeyEvents, back } = useChronos.getState()
+  const t = useT()
 
   const data = keyEvents.status === 'ready' ? keyEvents.data : null
   const detail = data?.events.find((e) => e.id === selectedEvent) ?? null
@@ -48,16 +52,13 @@ export function EventsPanel() {
           aria-live="polite"
         >
           <p className="font-mono text-[10px] tracking-[0.3em] text-real uppercase">
-            {(data?.zone.name ?? country.name) + ' · ' + formatYear(data?.year ?? year)}
+            {(data?.zone.name ?? countryName(country)) + ' · ' + formatYear(data?.year ?? year)}
           </p>
 
           {keyEvents.status === 'loading' && (
             <>
-              <h2 className="mt-3 font-display text-3xl font-medium">Consultation des archives…</h2>
-              <p className="mt-3 text-sm leading-relaxed text-parchment/70">
-                Sélection des cinq événements qui ont façonné cette période — et ce qui a suivi. Cela peut prendre une
-                trentaine de secondes.
-              </p>
+              <h2 className="mt-3 font-display text-3xl font-medium">{t('events.loadingTitle')}</h2>
+              <p className="mt-3 text-sm leading-relaxed text-parchment/70">{t('events.loadingText')}</p>
               <div className="relative mt-6 h-px overflow-hidden bg-parchment/10">
                 <motion.div
                   className="absolute inset-y-0 w-1/3 bg-real"
@@ -66,14 +67,14 @@ export function EventsPanel() {
                 />
               </div>
               <button type="button" onClick={back} className={`${ghostButton} mt-6 self-start px-0`}>
-                ← Changer d'époque
+                {t('events.changeEra')}
               </button>
             </>
           )}
 
           {keyEvents.status === 'error' && (
             <>
-              <h2 className="mt-3 font-display text-3xl font-medium">Les archives restent muettes</h2>
+              <h2 className="mt-3 font-display text-3xl font-medium">{t('events.errorTitle')}</h2>
               <p className="mt-3 text-sm leading-relaxed text-rupture" role="alert">
                 {keyEvents.message}
               </p>
@@ -83,10 +84,10 @@ export function EventsPanel() {
                   onClick={() => void loadKeyEvents()}
                   className="rounded-full bg-real/90 px-5 py-2.5 font-mono text-xs tracking-[0.2em] text-void uppercase transition-colors hover:bg-real focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-real"
                 >
-                  Réessayer
+                  {t('common.retry')}
                 </button>
                 <button type="button" onClick={back} className={ghostButton}>
-                  ← Changer d'époque
+                  {t('events.changeEra')}
                 </button>
               </div>
             </>
@@ -100,14 +101,14 @@ export function EventsPanel() {
               </p>
               {data.demo && (
                 <div className="mt-3 rounded-md border border-alt/40 px-3 py-2 text-xs text-alt">
-                  <p>Mode démo : données d'exemple (Allemagne, 1939), sans appel à l'IA.</p>
+                  <p>{t('events.demo')}</p>
                   {STATIC_SITE && (
                     <button
                       type="button"
                       onClick={() => useChronos.getState().setKeyDialogOpen(true)}
                       className="mt-1.5 font-medium text-parchment underline underline-offset-2 hover:text-alt"
                     >
-                      Ajouter une clé Gemini gratuite pour explorer cette zone →
+                      {t('events.addKey')}
                     </button>
                   )}
                 </div>
@@ -115,7 +116,7 @@ export function EventsPanel() {
               <p className="mt-3 text-sm leading-relaxed text-parchment/75">{data.context}</p>
 
               <p className="mt-5 font-mono text-[10px] tracking-[0.3em] text-dust uppercase">
-                Les 5 événements déterminants
+                {t('events.five')}
               </p>
               <ol className="-mx-2 mt-2">
                 {data.events.map((event, i) => (
@@ -145,10 +146,10 @@ export function EventsPanel() {
               </ol>
 
               <p className="mt-4 text-[11px] leading-relaxed text-dust">
-                Sélection générée par IA à partir de faits historiques. Vérifiez les points importants.
+                {t('events.disclaimer')}
               </p>
               <button type="button" onClick={back} className={`${ghostButton} mt-3 self-start px-0`}>
-                ← Changer d'époque <span className="opacity-50">(Échap)</span>
+                {t('events.changeEra')} <span className="opacity-50">{t('common.esc')}</span>
               </button>
             </>
           )}
@@ -164,6 +165,7 @@ function EventDetail({ event, index, onBack }: { event: KeyEvent; index: number;
   const alteration = useChronos((s) => s.alteration)
   const fracturing = useChronos((s) => s.fracturing)
   const rewrite = useChronos((s) => s.rewrite)
+  const t = useT()
   return (
     <>
       <div className="mt-3 flex items-baseline justify-between gap-3">
@@ -177,10 +179,10 @@ function EventDetail({ event, index, onBack }: { event: KeyEvent; index: number;
       </div>
       <p className="mt-4 text-sm leading-relaxed text-parchment/85">{event.summary}</p>
 
-      <h3 className="mt-5 font-mono text-[10px] tracking-[0.3em] text-dust uppercase">Pourquoi c'est déterminant</h3>
+      <h3 className="mt-5 font-mono text-[10px] tracking-[0.3em] text-dust uppercase">{t('events.why')}</h3>
       <p className="mt-1.5 text-sm leading-relaxed text-parchment/75">{event.whyItMattered}</p>
 
-      <h3 className="mt-4 font-mono text-[10px] tracking-[0.3em] text-dust uppercase">Impact à long terme</h3>
+      <h3 className="mt-4 font-mono text-[10px] tracking-[0.3em] text-dust uppercase">{t('events.longTerm')}</h3>
       <p className="mt-1.5 text-sm leading-relaxed text-parchment/75">{event.longTermImpact}</p>
 
       <AlterationPicker event={event} />
@@ -192,10 +194,10 @@ function EventDetail({ event, index, onBack }: { event: KeyEvent; index: number;
           disabled={!alteration || fracturing}
           className="rounded-full bg-alt/90 px-5 py-2.5 font-mono text-xs tracking-[0.2em] text-void uppercase transition-colors hover:bg-alt focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-alt disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Réécrire l'histoire →
+          {t('events.rewrite')}
         </button>
         <button type="button" onClick={onBack} className={ghostButton}>
-          ← Les 5 événements <span className="opacity-50">(Échap)</span>
+          {t('events.backToFive')} <span className="opacity-50">{t('common.esc')}</span>
         </button>
       </div>
     </>
@@ -209,6 +211,7 @@ function AlterationPicker({ event }: { event: KeyEvent }) {
   const alteration = useChronos((s) => s.alteration)
   const setAlteration = useChronos((s) => s.setAlteration)
   const [free, setFree] = useState('')
+  const t = useT()
   const isFree = !!alteration && !event.possibleAlterations.some((a) => a.title === alteration.title)
 
   const option = (active: boolean) =>
@@ -218,7 +221,7 @@ function AlterationPicker({ event }: { event: KeyEvent }) {
 
   return (
     <fieldset className="mt-5">
-      <legend className="font-mono text-[10px] tracking-[0.3em] text-alt uppercase">Et si… choisissez la modification</legend>
+      <legend className="font-mono text-[10px] tracking-[0.3em] text-alt uppercase">{t('events.pick')}</legend>
       <div className="mt-2 flex flex-col gap-2" role="radiogroup">
         {event.possibleAlterations.map((alt) => {
           const active = alteration?.title === alt.title
@@ -237,12 +240,12 @@ function AlterationPicker({ event }: { event: KeyEvent }) {
           )
         })}
         <label className={`${option(isFree)} block cursor-text`}>
-          <span className={`block text-sm ${isFree ? 'text-alt' : ''}`}>Votre propre hypothèse</span>
+          <span className={`block text-sm ${isFree ? 'text-alt' : ''}`}>{t('events.own')}</span>
           <textarea
             rows={2}
             maxLength={FREE_MAX}
             value={free}
-            placeholder="Et si…"
+            placeholder={t('events.ownPlaceholder')}
             onChange={(e) => {
               setFree(e.target.value)
               const text = e.target.value.trim()

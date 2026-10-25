@@ -28,7 +28,7 @@ Ensuite :
 - **Partage** — « Partager » enregistre le scénario terminé et copie un lien `/?s=…` qui le rouvre tel
   quel, sans nouvel appel à l'IA.
 
-`Échap` revient d'une étape à tout moment. Le son (ambiance et effets, synthétisés dans le navigateur)
+`Échap` revient d'une étape à tout moment. Le bouton **FR | EN** en haut à droite change la langue de l'interface et des textes générés par l'IA (la démo existe dans les deux langues). Le son (ambiance et effets, synthétisés dans le navigateur)
 est désactivé par défaut : bouton haut-parleur dans un coin de l’écran.
 
 ## Stack

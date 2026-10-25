@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import type { TimelineNode } from '../../shared/schemas'
 import { formatYear } from '../lib/time'
 import { activeBranchOf, branchLabel, branchPath, useChronos, type Branch } from '../store/useChronos'
+import { useT } from '../i18n'
 
 interface Row {
   node: TimelineNode
@@ -29,6 +30,7 @@ export function ComparisonView() {
   const setComparing = useChronos((s) => s.setComparing)
   const selectNode = useChronos((s) => s.selectNode)
   const setActiveBranch = useChronos((s) => s.setActiveBranch)
+  const t = useT()
 
   const root = branches[0]
   const data = branch?.data
@@ -46,7 +48,7 @@ export function ComparisonView() {
           onClick={(e) => e.target === e.currentTarget && setComparing(false)}
           role="dialog"
           aria-modal="true"
-          aria-label="Comparaison entre la réalité et la chronologie alternative"
+          aria-label={t('compare.dialog')}
         >
           <motion.div
             className="glass w-full max-w-5xl rounded-2xl p-5 sm:p-8"
@@ -57,7 +59,7 @@ export function ComparisonView() {
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="font-mono text-[10px] tracking-[0.3em] text-rupture uppercase">Mode comparaison</p>
+                <p className="font-mono text-[10px] tracking-[0.3em] text-rupture uppercase">{t('compare.kicker')}</p>
                 <h2 className="mt-2 font-display text-3xl leading-tight font-medium sm:text-4xl">
                   {branch.alteration.title}
                 </h2>
@@ -67,16 +69,16 @@ export function ComparisonView() {
                 onClick={() => setComparing(false)}
                 className="shrink-0 rounded-full px-3 py-1.5 font-mono text-[11px] tracking-[0.2em] text-dust uppercase hover:text-parchment focus-visible:outline-2 focus-visible:outline-real"
               >
-                Fermer <span className="opacity-50">(Échap)</span>
+                {t('common.close')} <span className="opacity-50">{t('common.esc')}</span>
               </button>
             </div>
 
             {/* column headers, desktop only (mobile labels each cell) */}
             <div className="mt-6 hidden grid-cols-[5rem_1fr_1fr] gap-3 sm:grid">
               <span />
-              <p className="font-mono text-[10px] tracking-[0.3em] text-real uppercase">Dans la réalité</p>
+              <p className="font-mono text-[10px] tracking-[0.3em] text-real uppercase">{t('alt.inReality')}</p>
               <p className="font-mono text-[10px] tracking-[0.3em] text-alt uppercase">
-                Dans cette chronologie · {branchLabel(branch.id)}
+                {t('compare.thisTimeline', { branch: branchLabel(branch.id) })}
               </p>
             </div>
 
@@ -84,12 +86,12 @@ export function ComparisonView() {
               <li className="grid grid-cols-1 gap-2 sm:grid-cols-[5rem_1fr_1fr] sm:gap-3">
                 <span className="font-mono text-sm text-rupture tabular-nums">{formatYear(root.event.year)}</span>
                 <div className={`${cell} border border-real/25 bg-real/5`}>
-                  <p className="font-mono text-[10px] tracking-[0.2em] text-real uppercase sm:hidden">Dans la réalité</p>
+                  <p className="font-mono text-[10px] tracking-[0.2em] text-real uppercase sm:hidden">{t('alt.inReality')}</p>
                   <p className="font-medium">{root.event.title}</p>
                   <p className="mt-1 text-parchment/75">{root.event.summary}</p>
                 </div>
                 <div className={`${cell} border border-rupture/40 bg-rupture/5`}>
-                  <p className="font-mono text-[10px] tracking-[0.2em] text-rupture uppercase">Point de divergence</p>
+                  <p className="font-mono text-[10px] tracking-[0.2em] text-rupture uppercase">{t('scene.divergence')}</p>
                   <p className="mt-1 font-medium">{root.alteration.title}</p>
                   {root.data && <p className="mt-1 text-parchment/75">{root.data.divergencePoint.description}</p>}
                 </div>
@@ -106,7 +108,7 @@ export function ComparisonView() {
                       )}
                     </div>
                     <div className={`${cell} border border-real/20`}>
-                      <p className="font-mono text-[10px] tracking-[0.2em] text-real uppercase sm:hidden">Dans la réalité</p>
+                      <p className="font-mono text-[10px] tracking-[0.2em] text-real uppercase sm:hidden">{t('alt.inReality')}</p>
                       <p className="text-parchment/80">{node.realHistoryComparison}</p>
                     </div>
                     <button
@@ -127,7 +129,7 @@ export function ComparisonView() {
                       <span className="mt-1 block text-parchment/75">{node.description}</span>
                       {forkHere && (
                         <span className="mt-2 block font-mono text-[10px] text-branch">
-                          ⑂ {branchLabel(forkHere.id)} diverge ici
+                          {t('compare.forkHere', { branch: branchLabel(forkHere.id) })}
                         </span>
                       )}
                     </button>
@@ -138,18 +140,18 @@ export function ComparisonView() {
               <li className="grid grid-cols-1 gap-2 sm:grid-cols-[5rem_1fr_1fr] sm:gap-3">
                 <span className="font-mono text-sm text-parchment tabular-nums">2025</span>
                 <div className={`${cell} border border-real/20`}>
-                  <p className="font-mono text-[10px] tracking-[0.2em] text-real uppercase sm:hidden">Dans la réalité</p>
-                  <p className="text-parchment/80">Le monde tel que nous le connaissons.</p>
+                  <p className="font-mono text-[10px] tracking-[0.2em] text-real uppercase sm:hidden">{t('alt.inReality')}</p>
+                  <p className="text-parchment/80">{t('compare.realWorld')}</p>
                 </div>
                 <div className={`${cell} border border-alt/40 bg-alt/5`}>
-                  <p className="font-mono text-[10px] tracking-[0.2em] text-alt uppercase">Le monde en 2025</p>
+                  <p className="font-mono text-[10px] tracking-[0.2em] text-alt uppercase">{t('alt.world2025')}</p>
                   <p className="mt-1 text-parchment/85">{data.worldIn2025}</p>
                 </div>
               </li>
             </ol>
 
             <p className="mt-6 text-xs leading-relaxed text-dust">
-              <span className="text-parchment/70">Plausibilité — </span>
+              <span className="text-parchment/70">{t('compare.plausibility')}</span>
               {data.plausibilityNote}
             </p>
           </motion.div>

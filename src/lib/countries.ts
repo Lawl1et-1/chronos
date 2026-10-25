@@ -4,9 +4,12 @@ import { geoArea, geoBounds, geoCentroid, geoEquirectangular, geoPath } from 'd3
 import type { Feature, MultiPolygon, Polygon, Position } from 'geojson'
 import isoCountries from 'i18n-iso-countries'
 import fr from 'i18n-iso-countries/langs/fr.json'
+import en from 'i18n-iso-countries/langs/en.json'
 import { DEG, latLonToVector3 } from './geo'
+import { getLang, type Lang } from '../i18n'
 
 isoCountries.registerLocale(fr)
+isoCountries.registerLocale(en)
 
 export type CountryFeature = Feature<Polygon | MultiPolygon, { name: string }>
 
@@ -14,7 +17,7 @@ export interface Country {
   /** 1-based index, also the value stored in the ID map (0 = ocean). */
   index: number
   iso: string | null
-  name: string
+  names: Record<Lang, string>
   feature: CountryFeature
   /** Centroid of the largest landmass, [lat, lon]. */
   center: [number, number]
@@ -52,10 +55,13 @@ function largestPolygon(f: CountryFeature): Feature<Polygon> {
   return { type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: best } }
 }
 
-function frenchName(id: string | undefined, fallback: string) {
+function localName(id: string | undefined, lang: Lang, fallback: string) {
   const alpha2 = id ? isoCountries.numericToAlpha2(id) : undefined
-  return (alpha2 && isoCountries.getName(alpha2, 'fr')) || fallback
+  return (alpha2 && isoCountries.getName(alpha2, lang)) || fallback
 }
+
+/** Name of a country in the current (or given) language. */
+export const countryName = (c: Country, lang: Lang = getLang()) => c.names[lang]
 
 function rings(f: CountryFeature): Position[][] {
   return f.geometry.type === 'Polygon' ? f.geometry.coordinates : f.geometry.coordinates.flat()
@@ -130,7 +136,7 @@ async function load(): Promise<CountryData> {
     return {
       index: k + 1,
       iso: id ?? null,
-      name: frenchName(id, f.properties.name),
+      names: { fr: localName(id, 'fr', f.properties.name), en: localName(id, 'en', f.properties.name) },
       feature: f,
       center: [lat, lon],
       extent: Math.max(Math.sqrt(geoArea(main) / Math.PI), span / 2.6),

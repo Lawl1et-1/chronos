@@ -9,9 +9,14 @@ export const ZoneSchema = z.object({
 })
 export type Zone = z.infer<typeof ZoneSchema>
 
+/** Language the AI writes in (the interface language). */
+export const LangSchema = z.enum(['fr', 'en'])
+export type ContentLang = z.infer<typeof LangSchema>
+
 export const KeyEventsRequestSchema = z.object({
   zone: ZoneSchema,
   year: z.number().int().min(-3000).max(2020),
+  lang: LangSchema.default('fr'),
 })
 export type KeyEventsRequest = z.infer<typeof KeyEventsRequestSchema>
 
@@ -82,6 +87,7 @@ export type Alteration = z.infer<typeof AlterationSchema>
 export const AlternateRequestSchema = z.object({
   zone: ZoneSchema,
   year: z.number().int().min(-3000).max(2020),
+  lang: LangSchema.default('fr'),
   event: z.object({
     id: z.string().max(80),
     title: z.string().max(200),
