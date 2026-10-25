@@ -3,7 +3,6 @@ import { AnimatePresence, motion } from 'framer-motion'
 import type { KeyEvent } from '../../shared/schemas'
 import { formatRange, formatYear } from '../lib/time'
 import { selectedCountry, useChronos } from '../store/useChronos'
-import { STATIC_SITE } from '../api/client'
 import { countryName } from '../lib/countries'
 import { useT } from '../i18n'
 
@@ -99,20 +98,6 @@ export function EventsPanel() {
               <p className="mt-1 font-mono text-[10px] text-dust">
                 {formatRange(data.period.start, data.period.end)}
               </p>
-              {data.demo && (
-                <div className="mt-3 rounded-md border border-alt/40 px-3 py-2 text-xs text-alt">
-                  <p>{t('events.demo')}</p>
-                  {STATIC_SITE && (
-                    <button
-                      type="button"
-                      onClick={() => useChronos.getState().setKeyDialogOpen(true)}
-                      className="mt-1.5 font-medium text-parchment underline underline-offset-2 hover:text-alt"
-                    >
-                      {t('events.addKey')}
-                    </button>
-                  )}
-                </div>
-              )}
               <p className="mt-3 text-sm leading-relaxed text-parchment/75">{data.context}</p>
 
               <p className="mt-5 font-mono text-[10px] tracking-[0.3em] text-dust uppercase">

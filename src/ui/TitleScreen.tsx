@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { useChronos } from '../store/useChronos'
-import { STATIC_SITE } from '../api/client'
 import { useT } from '../i18n'
 
 const LETTERS = 'CHRONOS'.split('')
@@ -11,7 +10,6 @@ export function TitleScreen() {
   const enter = useChronos((s) => s.enter)
   const share = useChronos((s) => s.pendingShare)
   const shareError = useChronos((s) => s.shareError)
-  const hasKey = useChronos((s) => !!s.geminiKey)
   const t = useT()
   const sharedBranch = share?.branches.find((b) => b.id === share.activeBranch) ?? share?.branches[0]
 
@@ -73,16 +71,6 @@ export function TitleScreen() {
               <p className="mt-1.5 font-display text-xl leading-snug">{sharedBranch.alteration.title}</p>
               <p className="mt-1 text-xs text-dust">{t('title.sharedFrom', { event: sharedBranch.event.title })}</p>
             </motion.div>
-          )}
-          {STATIC_SITE && !hasKey && !share && ready && (
-            <motion.p
-              className="mt-5 max-w-sm text-xs leading-relaxed text-dust"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 2.4, duration: 0.8 }}
-            >
-              {t('title.demoHint')}
-            </motion.p>
           )}
           {shareError && (
             <p className="mt-6 text-sm text-rupture" role="alert">

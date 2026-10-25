@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion'
 import { useLang, useT, type Lang } from '../i18n'
-import { KeyButton } from './KeyDialog'
 import { SoundToggle } from './SoundToggle'
 
 const LANGS: Lang[] = ['fr', 'en']
@@ -31,7 +30,7 @@ function LangSwitch() {
   )
 }
 
-/** Top-right controls: AI key (static site), sound, language. */
+/** Top-right controls: sound and language. */
 export function Toolbar() {
   return (
     <motion.div
@@ -40,7 +39,6 @@ export function Toolbar() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.4, duration: 0.6 }}
     >
-      <KeyButton />
       <SoundToggle />
       <LangSwitch />
     </motion.div>

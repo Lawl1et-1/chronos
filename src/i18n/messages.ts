@@ -6,8 +6,6 @@ const fr = {
   'title.tagline': 'Choisissez un lieu, une époque, un événement. Puis changez-le.',
   'title.shared': 'Chronologie partagée · {zone}',
   'title.sharedFrom': 'À partir de : {event}',
-  'title.demoHint':
-    "Démonstration sans clé. Pour explorer n'importe quelle zone, ajoutez ensuite votre clé Gemini gratuite (bouton « Mode démo »).",
   'title.loading': 'Chargement…',
   'title.openShared': 'Ouvrir la chronologie',
   'title.enter': 'Entrer',
@@ -30,8 +28,6 @@ const fr = {
   'lang.switchTo': 'Passer en anglais',
   'sound.on': 'Activer le son',
   'sound.off': 'Couper le son',
-  'key.live': 'IA active',
-  'key.demo': 'Mode démo',
 
   // search
   'search.label': 'Rechercher un pays',
@@ -61,8 +57,6 @@ const fr = {
     'Sélection des cinq événements qui ont façonné cette période — et ce qui a suivi. Cela peut prendre une trentaine de secondes.',
   'events.changeEra': "← Changer d'époque",
   'events.errorTitle': 'Les archives restent muettes',
-  'events.demo': "Mode démo : données d'exemple (Allemagne, 1939), sans appel à l'IA.",
-  'events.addKey': 'Ajouter une clé Gemini gratuite pour explorer cette zone →',
   'events.five': 'Les 5 événements déterminants',
   'events.disclaimer': 'Sélection générée par IA à partir de faits historiques. Vérifiez les points importants.',
   'events.why': "Pourquoi c'est déterminant",
@@ -76,7 +70,6 @@ const fr = {
 
   // alternate timeline
   'alt.speculative': 'Chronologie spéculative',
-  'alt.demoSuffix': ' · démo',
   'alt.whatIf': 'Et si…',
   'alt.whatIfIn': 'Et si, en {year}…',
   'alt.streamingNode': 'Reconstruction de la chronologie… 1 jalon',
@@ -132,16 +125,12 @@ const fr = {
 
   // key dialog
   'key.kicker': 'Intelligence artificielle',
-  'key.title': 'Votre clé Gemini',
-  'key.intro':
-    "Sans clé, CHRONOS montre une démonstration (Allemagne, 1939). Avec une clé Gemini gratuite, explorez n'importe quelle zone et n'importe quelle époque.",
-  'key.step1': 'Créez une clé sur',
-  'key.step2': 'Collez-la ci-dessous.',
+  'key.title': 'Clé API',
+  'key.intro': "Clé utilisée par ce navigateur pour les appels à l'IA.",
   'key.field': 'Clé API',
   'key.placeholderSaved': 'Une clé est enregistrée — en coller une autre',
   'key.placeholder': 'Collez votre clé ici',
-  'key.privacy':
-    "La clé reste dans ce navigateur et n'est envoyée qu'à Google. Sur l'offre gratuite, Google peut utiliser les requêtes pour améliorer ses produits.",
+  'key.privacy': "La clé reste dans ce navigateur et n'est envoyée qu'au fournisseur d'IA.",
   'key.save': 'Enregistrer',
   'key.remove': 'Retirer la clé',
 
@@ -180,7 +169,6 @@ const en: Record<MessageKey, string> = {
   'title.tagline': 'Pick a place, an era, an event. Then change it.',
   'title.shared': 'Shared timeline · {zone}',
   'title.sharedFrom': 'Starting from: {event}',
-  'title.demoHint': 'Demo without a key. To explore any region, add your free Gemini key (“Demo mode” button).',
   'title.loading': 'Loading…',
   'title.openShared': 'Open the timeline',
   'title.enter': 'Enter',
@@ -201,8 +189,6 @@ const en: Record<MessageKey, string> = {
   'lang.switchTo': 'Switch to French',
   'sound.on': 'Turn sound on',
   'sound.off': 'Turn sound off',
-  'key.live': 'AI on',
-  'key.demo': 'Demo mode',
 
   'search.label': 'Search for a country',
   'search.placeholder': 'Search for a country…',
@@ -227,8 +213,6 @@ const en: Record<MessageKey, string> = {
     'Selecting the five events that shaped this period — and what came after. This can take about thirty seconds.',
   'events.changeEra': '← Change era',
   'events.errorTitle': 'The archives are silent',
-  'events.demo': 'Demo mode: sample data (Germany, 1939), no AI call.',
-  'events.addKey': 'Add a free Gemini key to explore this region →',
   'events.five': 'The 5 defining events',
   'events.disclaimer': 'AI-generated selection based on historical facts. Double-check what matters.',
   'events.why': 'Why it was decisive',
@@ -241,7 +225,6 @@ const en: Record<MessageKey, string> = {
   'events.clickDetail': 'Click for details',
 
   'alt.speculative': 'Speculative timeline',
-  'alt.demoSuffix': ' · demo',
   'alt.whatIf': 'What if…',
   'alt.whatIfIn': 'What if, in {year}…',
   'alt.streamingNode': 'Rebuilding the timeline… 1 milestone',
@@ -294,16 +277,12 @@ const en: Record<MessageKey, string> = {
   'share.invalid': 'This share link is invalid or incomplete.',
 
   'key.kicker': 'Artificial intelligence',
-  'key.title': 'Your Gemini key',
-  'key.intro':
-    'Without a key, CHRONOS shows a demo (Germany, 1939). With a free Gemini key, explore any region and any era.',
-  'key.step1': 'Create a key on',
-  'key.step2': 'Paste it below.',
+  'key.title': 'API key',
+  'key.intro': 'Key used by this browser for AI calls.',
   'key.field': 'API key',
   'key.placeholderSaved': 'A key is saved — paste another one',
   'key.placeholder': 'Paste your key here',
-  'key.privacy':
-    'The key stays in this browser and is only sent to Google. On the free tier, Google may use requests to improve its products.',
+  'key.privacy': 'The key stays in this browser and is only sent to the AI provider.',
   'key.save': 'Save',
   'key.remove': 'Remove the key',
 

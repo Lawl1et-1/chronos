@@ -1,32 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { STATIC_SITE } from '../api/client'
 import { useT } from '../i18n'
 import { useChronos } from '../store/useChronos'
 
-const AI_STUDIO = 'https://aistudio.google.com/apikey'
-
-/** Static site only: lets visitors use their own free Gemini key instead of the demo. */
-export function KeyButton() {
-  const phase = useChronos((s) => s.phase)
-  const hasKey = useChronos((s) => !!s.geminiKey)
-  const open = useChronos((s) => s.setKeyDialogOpen)
-  const t = useT()
-  if (!STATIC_SITE || phase === 'intro') return null
-  const label = hasKey ? t('key.live') : t('key.demo')
-  return (
-    <button
-      type="button"
-      onClick={() => open(true)}
-      title={label}
-      className="glass flex h-10 items-center gap-2 rounded-full px-4 font-mono text-[10px] tracking-[0.2em] text-parchment/80 uppercase transition-colors hover:text-parchment focus-visible:outline-2 focus-visible:outline-real max-sm:w-10 max-sm:justify-center max-sm:px-0"
-    >
-      <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${hasKey ? 'bg-real' : 'bg-alt'}`} />
-      <span className="max-sm:sr-only">{label}</span>
-    </button>
-  )
-}
-
+/** Static site only, opened with Shift+K: sets the API key used from this browser. */
 export function KeyDialog() {
   const open = useChronos((s) => s.keyDialogOpen)
   const current = useChronos((s) => s.geminiKey)
@@ -71,23 +48,13 @@ export function KeyDialog() {
               {t('key.title')}
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-parchment/75">{t('key.intro')}</p>
-            <ol className="mt-3 list-decimal space-y-1 pl-5 text-sm text-parchment/75">
-              <li>
-                {t('key.step1')}{' '}
-                <a href={AI_STUDIO} target="_blank" rel="noreferrer" className="text-real underline underline-offset-2">
-                  Google AI Studio
-                </a>
-                .
-              </li>
-              <li>{t('key.step2')}</li>
-            </ol>
 
-            <label htmlFor="gemini-key" className="mt-5 block font-mono text-[10px] tracking-[0.2em] text-dust uppercase">
+            <label htmlFor="api-key" className="mt-5 block font-mono text-[10px] tracking-[0.2em] text-dust uppercase">
               {t('key.field')}
             </label>
             <input
               ref={input}
-              id="gemini-key"
+              id="api-key"
               type="password"
               autoComplete="off"
               spellCheck={false}

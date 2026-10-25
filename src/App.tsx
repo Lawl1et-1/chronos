@@ -16,7 +16,7 @@ import { Loader } from './ui/Loader'
 import { Toolbar } from './ui/Toolbar'
 import { ComparisonView } from './ui/ComparisonView'
 import { KeyDialog } from './ui/KeyDialog'
-import { ApiRequestError, sharedFromUrl } from './api/client'
+import { ApiRequestError, STATIC_SITE, sharedFromUrl } from './api/client'
 import { errorText, translate } from './i18n'
 
 /** A warm flash across the screen while the chosen event shatters. */
@@ -51,6 +51,11 @@ export default function App() {
           .setShareError(error instanceof ApiRequestError ? errorText(error.code, error.message) : translate('share.invalid')),
       )
     const onKey = (e: KeyboardEvent) => {
+      // hidden entry to the API key screen on the static site
+      if (STATIC_SITE && e.key === 'K' && e.shiftKey && !(e.target instanceof HTMLInputElement)) {
+        useChronos.getState().setKeyDialogOpen(true)
+        return
+      }
       if (e.key !== 'Escape') return
       // let inputs handle their own Escape (clearing a search, etc.)
       if (e.target instanceof HTMLInputElement && e.target.type === 'search' && e.target.value) return

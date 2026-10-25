@@ -87,7 +87,6 @@ export function AlternatePanel() {
         >
           <p className="self-start rounded-full border border-rupture/50 px-2.5 py-0.5 font-mono text-[9px] tracking-[0.25em] text-rupture uppercase">
             {t('alt.speculative')}
-            {data?.demo ? t('alt.demoSuffix') : ''}
           </p>
           <Breadcrumb branch={branch} />
 
