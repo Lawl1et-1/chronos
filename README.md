@@ -25,6 +25,10 @@ Ensuite :
   la chronologie parente jusqu'au point de bifurcation.
 - **Mode comparaison** — réalité et chronologie alternative côte à côte, jalon par jalon, en suivant
   les branches depuis la racine.
+- **Impact de la modification** — chaque chronologie reçoit un score de 0 à 100 (l'IA évalue l'écart
+  entre le monde de 2025 de cette branche et le monde réel, avec un verdict et 5 dimensions :
+  politique, économie, société, culture, géopolitique), complété par des mesures tirées de la
+  chronologie elle-même : pays touchés, années réécrites, confiance moyenne.
 - **Partage** — « Partager » enregistre le scénario terminé et copie un lien `/?s=…` qui le rouvre tel
   quel, sans nouvel appel à l'IA.
 

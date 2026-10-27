@@ -3,6 +3,7 @@ import type { TimelineNode } from '../../shared/schemas'
 import { formatYear } from '../lib/time'
 import { activeBranchOf, branchLabel, branchPath, useChronos, type Branch } from '../store/useChronos'
 import { useT } from '../i18n'
+import { impactTone } from '../lib/impact'
 
 interface Row {
   node: TimelineNode
@@ -63,6 +64,17 @@ export function ComparisonView() {
                 <h2 className="mt-2 font-display text-3xl leading-tight font-medium sm:text-4xl">
                   {branch.alteration.title}
                 </h2>
+                {data.impact && (
+                  <p
+                    className={`mt-2 inline-block rounded-full border px-3 py-1 font-mono text-[11px] ${
+                      { real: 'border-real/50 text-real', alt: 'border-alt/50 text-alt', rupture: 'border-rupture/50 text-rupture' }[
+                        impactTone(data.impact.score)
+                      ]
+                    }`}
+                  >
+                    {t('impact.chip', { score: data.impact.score, verdict: data.impact.verdict })}
+                  </p>
+                )}
               </div>
               <button
                 type="button"

@@ -126,6 +126,36 @@ const TimelineNode = z.object({
   affectedRegions: z.array(Region),
 })
 
+const ImpactDimensions = z.object({
+  politics: z.number().int(),
+  economy: z.number().int(),
+  society: z.number().int(),
+  culture: z.number().int(),
+  geopolitics: z.number().int(),
+})
+
+/** How much the change alters the world, as judged by the model. */
+const Impact = z.object({
+  score: z.number().int().describe("0 à 100 : écart entre le monde de 2025 de cette chronologie et le monde réel"),
+  verdict: z.string().describe('2 à 4 mots'),
+  summary: z.string(),
+  dimensions: ImpactDimensions.describe('Ampleur du changement par domaine, de 0 à 10'),
+})
+
+export const ImpactSchema = Impact.extend({
+  score: z.number().int().min(0).max(100),
+  verdict: z.string().min(2).max(60),
+  summary: z.string().min(10).max(500),
+  dimensions: z.object({
+    politics: z.number().int().min(0).max(10),
+    economy: z.number().int().min(0).max(10),
+    society: z.number().int().min(0).max(10),
+    culture: z.number().int().min(0).max(10),
+    geopolitics: z.number().int().min(0).max(10),
+  }),
+})
+export type Impact = z.infer<typeof ImpactSchema>
+
 /** Field order matters: the model writes them in this order, so the timeline streams before the epilogue. */
 export const AlternateOutputSchema = z.object({
   divergencePoint: z.object({ year: z.number().int(), title: z.string(), description: z.string() }),
@@ -133,6 +163,7 @@ export const AlternateOutputSchema = z.object({
   timeline: z.array(TimelineNode).describe('8 à 12 jalons, par ordre chronologique'),
   worldIn2025: z.string(),
   plausibilityNote: z.string(),
+  impact: Impact,
 })
 
 export const TimelineNodeSchema = TimelineNode.extend({
@@ -151,11 +182,13 @@ export const AlternateResultSchema = AlternateOutputSchema.extend({
     .refine((t) => t.every((n, i) => i === 0 || n.year >= t[i - 1].year), 'Les jalons doivent être chronologiques')
     .refine((t) => t[t.length - 1].year <= 2025, 'Aucun jalon après 2025')
     .refine((t) => t[t.length - 1].confidence <= t[0].confidence, 'La confiance doit baisser avec le temps'),
+  impact: ImpactSchema,
 })
 export type AlternateResult = z.infer<typeof AlternateResultSchema>
 
 export const AlternateResponseSchema = AlternateResultSchema.extend({
   demo: z.boolean(),
+  impact: ImpactSchema.optional(),
 })
 export type AlternateResponse = z.infer<typeof AlternateResponseSchema>
 

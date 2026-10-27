@@ -47,7 +47,7 @@ export function EventsPanel() {
         <motion.aside
           key={view}
           {...panelMotion}
-          className="glass pointer-events-auto absolute right-4 bottom-4 left-4 flex max-h-[50vh] flex-col overflow-y-auto rounded-2xl p-5 sm:top-1/2 sm:right-8 sm:bottom-auto sm:left-auto sm:max-h-[84vh] sm:w-[24rem] sm:-translate-y-1/2 sm:p-6"
+          className="glass pointer-events-auto absolute right-4 bottom-4 left-4 flex max-h-[50vh] flex-col overflow-y-auto rounded-2xl p-5 sm:top-[calc(50%+1.75rem)] sm:right-8 sm:bottom-auto sm:left-auto sm:max-h-[calc(100vh-8rem)] sm:w-[24rem] sm:-translate-y-1/2 sm:p-6"
           aria-live="polite"
         >
           <p className="font-mono text-[10px] tracking-[0.3em] text-real uppercase">

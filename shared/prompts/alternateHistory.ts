@@ -18,6 +18,11 @@ Contenu attendu :
 - "affectedRegions" : les pays actuels concernés par le jalon, avec leur code ISO 3166-1 numérique à 3 chiffres (par exemple "250" pour la France, "276" pour l'Allemagne, "840" pour les États-Unis), ou null s'il n'y en a pas.
 - "worldIn2025" : un paragraphe qui décrit le monde de 2025 dans cette chronologie, en restant prudent.
 - "plausibilityNote" : 2 à 4 phrases sur la plausibilité du scénario, ses hypothèses les plus fragiles, et les débats d'historiens réels sur cette question s'il y en a.
+- "impact" : évaluation calibrée de l'ampleur du changement.
+  - "score" de 0 à 100 = à quel point le monde de 2025 de cette chronologie diffère du monde réel. 0 : l'histoire reprend presque exactement son cours ; 30 : différences régionales notables ; 60 : l'ordre mondial est sensiblement différent ; 90 et plus : monde méconnaissable. Une petite cause ne produit pas automatiquement de grands effets : tiens compte des forces de fond qui ramènent l'histoire vers son cours, et ne gonfle pas le score.
+  - "verdict" : 2 à 4 mots (par exemple « Inflexion mineure », « Bouleversement régional », « Monde méconnaissable »).
+  - "summary" : 1 à 2 phrases qui justifient le score.
+  - "dimensions" : de 0 à 10, l'ampleur du changement en politique (politics), économie (economy), société (society), culture (culture) et géopolitique (geopolitics).
 
 Garde-fous :
 - La comparaison avec la réalité ne contient que des faits vérifiables.

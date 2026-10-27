@@ -16,7 +16,8 @@ import {
 import { readGeminiKey } from '../lib/geminiKey'
 import { decodeShare, encodeShare } from '../lib/shareCodec'
 
-const CACHE_PREFIX = 'chronos:v1:'
+// v2: scenarios carry an impact assessment
+const CACHE_PREFIX = 'chronos:v2:'
 
 /**
  * Static build (GitHub Pages): no server, the AI runs from the browser with the

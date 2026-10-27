@@ -34,7 +34,7 @@ export function EraPanel() {
       {phase === 'era' && country && (
         <motion.aside
           key="era"
-          className="glass pointer-events-auto absolute right-4 bottom-4 left-4 flex max-h-[52vh] flex-col overflow-y-auto rounded-2xl p-5 sm:top-1/2 sm:right-8 sm:bottom-auto sm:left-auto sm:max-h-[80vh] sm:w-[23rem] sm:-translate-y-1/2 sm:p-6"
+          className="glass pointer-events-auto absolute right-4 bottom-4 left-4 flex max-h-[52vh] flex-col overflow-y-auto rounded-2xl p-5 sm:top-[calc(50%+1.75rem)] sm:right-8 sm:bottom-auto sm:left-auto sm:max-h-[calc(100vh-8rem)] sm:w-[23rem] sm:-translate-y-1/2 sm:p-6"
           initial={{ opacity: 0, x: 40 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: 40 }}

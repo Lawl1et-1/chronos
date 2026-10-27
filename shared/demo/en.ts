@@ -25,15 +25,18 @@ export const DEMO_KEY_EVENTS_EN: KeyEventsResponse = {
       possibleAlterations: [
         {
           title: 'What if publication had been delayed?',
-          description: 'A slower review or censorship by the regime could have kept the result confidential for a few more months.',
+          description:
+            'A slower review or censorship by the regime could have kept the result confidential for a few more months.',
         },
         {
           title: 'What if the regime had made uranium an absolute priority?',
-          description: 'A first uranium working group existed from April 1939; it could have received far greater resources.',
+          description:
+            'A first uranium working group existed from April 1939; it could have received far greater resources.',
         },
         {
           title: 'What if Lise Meitner had been cut off from her colleagues?',
-          description: 'In exile in Sweden, she still corresponded with Hahn; without that link, the interpretation could have come later.',
+          description:
+            'In exile in Sweden, she still corresponded with Hahn; without that link, the interpretation could have come later.',
         },
       ],
     },
@@ -58,7 +61,8 @@ export const DEMO_KEY_EVENTS_EN: KeyEventsResponse = {
         },
         {
           title: 'What if London and Paris had responded militarily?',
-          description: 'Immediate mobilization was possible, even though both countries judged their rearmament insufficient.',
+          description:
+            'Immediate mobilization was possible, even though both countries judged their rearmament insufficient.',
         },
         {
           title: 'What if Hitler had kept to the Munich Agreement?',
@@ -87,11 +91,13 @@ export const DEMO_KEY_EVENTS_EN: KeyEventsResponse = {
         },
         {
           title: 'What if Stalin had refused to sign?',
-          description: 'The Kremlin hesitated between the two camps and could have preferred to stay neutral without an agreement.',
+          description:
+            'The Kremlin hesitated between the two camps and could have preferred to stay neutral without an agreement.',
         },
         {
           title: 'What if the secret protocol had been leaked at once?',
-          description: 'Its publication could have warned the Baltic states and Poland of the planned division of their territory.',
+          description:
+            'Its publication could have warned the Baltic states and Poland of the planned division of their territory.',
         },
       ],
     },
@@ -111,7 +117,8 @@ export const DEMO_KEY_EVENTS_EN: KeyEventsResponse = {
       possibleAlterations: [
         {
           title: 'What if France had launched a large-scale offensive in the Saar?',
-          description: 'The September 1939 offensive stays limited while most of the German army is fighting in Poland.',
+          description:
+            'The September 1939 offensive stays limited while most of the German army is fighting in Poland.',
         },
         {
           title: 'What if the USSR had not invaded eastern Poland?',
@@ -119,7 +126,8 @@ export const DEMO_KEY_EVENTS_EN: KeyEventsResponse = {
         },
         {
           title: 'What if the attack had been postponed for good?',
-          description: 'Planned for 26 August, it was pushed back at the last minute after the Anglo-Polish alliance was announced.',
+          description:
+            'Planned for 26 August, it was pushed back at the last minute after the Anglo-Polish alliance was announced.',
         },
       ],
     },
@@ -316,6 +324,19 @@ export const DEMO_ALTERNATE_EN: AlternateResponse = {
     'In this timeline, the Europe of 2025 never went through the Second World War as we know it, nor the post-war division. The European Union has included Central Europe for decades, nuclear weapons appeared later, and the former colonial empires left deeper marks in Africa and Asia. The United States remains a great power, but plays a much smaller role in Europe.',
   plausibilityNote:
     'Several historians consider that in September 1939 the Siegfried Line was weakly defended and that a determined French offensive could have hurt Germany. But the French army’s defensive doctrine and slow mobilization made that choice unlikely. Beyond 1940, the scenario rests on a successful coup, a very fragile assumption: confidence drops sharply.',
+  impact: {
+    score: 72,
+    verdict: 'Major upheaval',
+    summary:
+      'Without the Second World War or the division of Europe, the world order of 2025 is deeply different, even though the major economic and technological trends persist.',
+    dimensions: {
+      politics: 9,
+      economy: 6,
+      society: 6,
+      culture: 5,
+      geopolitics: 9,
+    },
+  },
 }
 
 export const DEMO_SUB_BRANCH_EN: AlternateResponse = {
@@ -370,8 +391,7 @@ export const DEMO_SUB_BRANCH_EN: AlternateResponse = {
       title: 'The Red Army goes to war',
       description:
         'Seeing German weakness, Stalin breaks the pact and attacks westward to occupy Poland and the Baltic states before the Western Allies.',
-      realHistoryComparison:
-        'In reality, it is Germany that invades the USSR on 22 June 1941 (Operation Barbarossa).',
+      realHistoryComparison: 'In reality, it is Germany that invades the USSR on 22 June 1941 (Operation Barbarossa).',
       confidence: 0.3,
       affectedRegions: [
         { name: 'Russia', iso: '643' },
@@ -397,8 +417,7 @@ export const DEMO_SUB_BRANCH_EN: AlternateResponse = {
       title: 'Germany occupied in two zones',
       description:
         'Allied and Soviet armies meet on the Elbe. The country is occupied, the west by the French and British, the east by the USSR.',
-      realHistoryComparison:
-        'In reality, Germany surrenders on 8 May 1945 and is divided into four occupation zones.',
+      realHistoryComparison: 'In reality, Germany surrenders on 8 May 1945 and is divided into four occupation zones.',
       confidence: 0.2,
       affectedRegions: [
         { name: 'Germany', iso: '276' },
@@ -424,7 +443,8 @@ export const DEMO_SUB_BRANCH_EN: AlternateResponse = {
       title: 'A more fragile Western Europe',
       description:
         'Without a large Marshall Plan, rebuilding in the west is slower and France and the United Kingdom go into debt to stand up to the Soviet bloc.',
-      realHistoryComparison: 'In reality, the Marshall Plan funds the reconstruction of Western Europe from 1948 to 1952.',
+      realHistoryComparison:
+        'In reality, the Marshall Plan funds the reconstruction of Western Europe from 1948 to 1952.',
       confidence: 0.12,
       affectedRegions: [
         { name: 'France', iso: '250' },
@@ -435,7 +455,7 @@ export const DEMO_SUB_BRANCH_EN: AlternateResponse = {
       year: 1990,
       title: 'Negotiated reunification',
       description:
-        "As in reality, the economic weakening of the Soviet bloc leads to German reunification, after a division a few years longer.",
+        'As in reality, the economic weakening of the Soviet bloc leads to German reunification, after a division a few years longer.',
       realHistoryComparison: 'In reality, Germany is reunified on 3 October 1990.',
       confidence: 0.1,
       affectedRegions: [{ name: 'Germany', iso: '276' }],
@@ -445,4 +465,17 @@ export const DEMO_SUB_BRANCH_EN: AlternateResponse = {
     'In this sub-branch, the world of 2025 looks more like ours: a Europe divided for a long time, a Germany reunified late and a European Union born later. The United States plays a smaller role, and Western Europe went through a harder reconstruction.',
   plausibilityNote:
     'The scenario assumes the USSR breaks the 1939 pact to attack a weakened Germany, a debatable assumption given the state of the Red Army after the 1937–1938 purges. Confidence drops quickly after 1942.',
+  impact: {
+    score: 34,
+    verdict: 'Back toward reality',
+    summary:
+      "The failed putsch brings history back toward its real course: war, Germany's division and then reunification, a few years off schedule.",
+    dimensions: {
+      politics: 5,
+      economy: 4,
+      society: 4,
+      culture: 3,
+      geopolitics: 6,
+    },
+  },
 }

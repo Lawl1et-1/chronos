@@ -14,6 +14,7 @@ import {
   type Branch,
 } from '../store/useChronos'
 import { ShareButton } from './ShareButton'
+import { ImpactCard } from './ImpactCard'
 import { useT } from '../i18n'
 
 const ghostButton =
@@ -83,7 +84,7 @@ export function AlternatePanel() {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: 40 }}
           transition={{ duration: 0.45, ease: [0.2, 0.7, 0.2, 1] }}
-          className="glass pointer-events-auto absolute right-4 bottom-4 left-4 flex max-h-[48vh] flex-col overflow-y-auto rounded-2xl p-5 sm:top-1/2 sm:right-8 sm:bottom-auto sm:left-auto sm:max-h-[86vh] sm:w-[25rem] sm:-translate-y-1/2 sm:p-6"
+          className="glass pointer-events-auto absolute right-4 bottom-4 left-4 flex max-h-[48vh] flex-col overflow-y-auto rounded-2xl p-5 sm:top-[calc(50%+1.75rem)] sm:right-8 sm:bottom-auto sm:left-auto sm:max-h-[calc(100vh-8rem)] sm:w-[25rem] sm:-translate-y-1/2 sm:p-6"
         >
           <p className="self-start rounded-full border border-rupture/50 px-2.5 py-0.5 font-mono text-[9px] tracking-[0.25em] text-rupture uppercase">
             {t('alt.speculative')}
@@ -138,6 +139,8 @@ export function AlternatePanel() {
                   </button>
                 </div>
               )}
+
+              {data && <ImpactCard data={data} />}
 
               {data && (
                 <div className="mt-4 flex flex-wrap items-start gap-2">

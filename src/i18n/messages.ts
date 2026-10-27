@@ -105,6 +105,19 @@ const fr = {
   'alt.forkOwnLabel': 'Votre hypothèse',
   'alt.forkCreate': 'Créer',
 
+  // impact of the change
+  'impact.title': 'Impact de la modification',
+  'impact.politics': 'Politique',
+  'impact.economy': 'Économie',
+  'impact.society': 'Société',
+  'impact.culture': 'Culture',
+  'impact.geopolitics': 'Géopolitique',
+  'impact.countries': 'Pays touchés',
+  'impact.years': 'Années réécrites',
+  'impact.confidence': 'Confiance moyenne',
+  'impact.scale': "Score de l'IA : 0, l'histoire reprend son cours ; 100, le monde de 2025 est méconnaissable.",
+  'impact.chip': 'Impact {score}/100 · {verdict}',
+
   // comparison
   'compare.kicker': 'Mode comparaison',
   'compare.dialog': 'Comparaison entre la réalité et la chronologie alternative',
@@ -259,6 +272,18 @@ const en: Record<MessageKey, string> = {
   'alt.forkOwn': 'Or your own hypothesis…',
   'alt.forkOwnLabel': 'Your hypothesis',
   'alt.forkCreate': 'Create',
+
+  'impact.title': 'Impact of the change',
+  'impact.politics': 'Politics',
+  'impact.economy': 'Economy',
+  'impact.society': 'Society',
+  'impact.culture': 'Culture',
+  'impact.geopolitics': 'Geopolitics',
+  'impact.countries': 'Countries affected',
+  'impact.years': 'Years rewritten',
+  'impact.confidence': 'Average confidence',
+  'impact.scale': 'AI score: 0, history gets back on track; 100, the world of 2025 is unrecognizable.',
+  'impact.chip': 'Impact {score}/100 · {verdict}',
 
   'compare.kicker': 'Comparison mode',
   'compare.dialog': 'Reality and the alternate timeline side by side',

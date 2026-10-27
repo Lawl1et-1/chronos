@@ -14,7 +14,7 @@ export const DEMO_ALTERNATE: AlternateResponse = {
   },
   butterflyEffects: [
     {
-      cause: "Percée française en Sarre pendant la campagne de Pologne",
+      cause: 'Percée française en Sarre pendant la campagne de Pologne',
       effect: "Le haut commandement allemand doit rappeler des divisions de l'Est en pleine offensive",
     },
     {
@@ -27,7 +27,8 @@ export const DEMO_ALTERNATE: AlternateResponse = {
     },
     {
       cause: 'Fin rapide du régime nazi',
-      effect: "L'Europe centrale échappe à la fois à l'occupation allemande prolongée et à la domination soviétique d'après-guerre",
+      effect:
+        "L'Europe centrale échappe à la fois à l'occupation allemande prolongée et à la domination soviétique d'après-guerre",
     },
   ],
   timeline: [
@@ -99,8 +100,7 @@ export const DEMO_ALTERNATE: AlternateResponse = {
       title: 'Pas de bombe atomique en 1945',
       description:
         "Sans guerre mondiale, les recherches sur la fission avancent au rythme des laboratoires civils. L'arme nucléaire n'apparaît que plus tard, dans un contexte de rivalité entre grandes puissances.",
-      realHistoryComparison:
-        "Dans la réalité, les États-Unis bombardent Hiroshima et Nagasaki en août 1945.",
+      realHistoryComparison: 'Dans la réalité, les États-Unis bombardent Hiroshima et Nagasaki en août 1945.',
       confidence: 0.3,
       affectedRegions: [
         { name: 'États-Unis', iso: '840' },
@@ -128,7 +128,7 @@ export const DEMO_ALTERNATE: AlternateResponse = {
       description:
         "L'intégration économique européenne associe dès l'origine la France, l'Allemagne, l'Italie et plusieurs pays d'Europe centrale, sans la pression d'une menace soviétique directe.",
       realHistoryComparison:
-        "Dans la réalité, le traité de Rome crée la Communauté économique européenne à six membres en 1957.",
+        'Dans la réalité, le traité de Rome crée la Communauté économique européenne à six membres en 1957.',
       confidence: 0.2,
       affectedRegions: [
         { name: 'France', iso: '250' },
@@ -167,6 +167,19 @@ export const DEMO_ALTERNATE: AlternateResponse = {
     "Dans cette chronologie, l'Europe de 2025 n'a pas connu la Seconde Guerre mondiale telle que nous la connaissons, ni la division de l'après-guerre. L'Union européenne inclut l'Europe centrale depuis des décennies, l'arme nucléaire est apparue plus tard, et les anciens empires coloniaux ont laissé des traces plus profondes en Afrique et en Asie. Les États-Unis restent une grande puissance, mais leur rôle en Europe est bien plus limité.",
   plausibilityNote:
     "Plusieurs historiens jugent qu'en septembre 1939, la ligne Siegfried était faiblement défendue et qu'une offensive française résolue aurait pu gêner l'Allemagne. Mais la doctrine défensive de l'armée française et la lenteur de sa mobilisation rendaient ce choix improbable. Au-delà de 1940, le scénario repose sur un coup d'État réussi, hypothèse très fragile : la confiance baisse fortement.",
+  impact: {
+    score: 72,
+    verdict: 'Bouleversement majeur',
+    summary:
+      "Sans Seconde Guerre mondiale ni division de l'Europe, l'ordre mondial de 2025 est profondément différent, même si les grandes tendances économiques et technologiques persistent.",
+    dimensions: {
+      politics: 9,
+      economy: 6,
+      society: 6,
+      culture: 5,
+      geopolitics: 9,
+    },
+  },
 }
 
 /**
@@ -183,7 +196,7 @@ export const DEMO_SUB_BRANCH: AlternateResponse = {
   },
   butterflyEffects: [
     {
-      cause: 'Échec du coup d\'État',
+      cause: "Échec du coup d'État",
       effect: "Purge massive de l'état-major et contrôle accru du parti sur l'armée",
     },
     {
@@ -191,7 +204,7 @@ export const DEMO_SUB_BRANCH: AlternateResponse = {
       effect: "L'armée allemande s'épuise sans victoire décisive à l'ouest comme à l'est",
     },
     {
-      cause: "Faiblesse militaire allemande visible",
+      cause: 'Faiblesse militaire allemande visible',
       effect: "L'URSS choisit d'entrer en guerre pour s'emparer de l'Europe centrale",
     },
   ],
@@ -200,7 +213,7 @@ export const DEMO_SUB_BRANCH: AlternateResponse = {
       year: 1940,
       title: 'La purge des officiers',
       description:
-        "Les conjurés sont arrêtés et exécutés. Le régime renforce la répression intérieure et place des fidèles à la tête des armées, au détriment de leur compétence.",
+        'Les conjurés sont arrêtés et exécutés. Le régime renforce la répression intérieure et place des fidèles à la tête des armées, au détriment de leur compétence.',
       realHistoryComparison:
         "Dans la réalité, en mai-juin 1940, l'Allemagne envahit les Pays-Bas, la Belgique et la France, qui signe l'armistice le 22 juin.",
       confidence: 0.5,
@@ -249,7 +262,7 @@ export const DEMO_SUB_BRANCH: AlternateResponse = {
     },
     {
       year: 1943,
-      title: "Une Allemagne occupée en deux zones",
+      title: 'Une Allemagne occupée en deux zones',
       description:
         "Les armées alliées et soviétiques se rejoignent sur l'Elbe. Le pays est occupé, l'ouest par les Franco-Britanniques, l'est par l'URSS.",
       realHistoryComparison:
@@ -302,4 +315,17 @@ export const DEMO_SUB_BRANCH: AlternateResponse = {
     "Dans cette sous-branche, le monde de 2025 ressemble davantage au nôtre : une Europe longtemps divisée, une Allemagne réunifiée tardivement et une Union européenne née plus tard. Les États-Unis y jouent un rôle moindre et l'Europe occidentale a connu une reconstruction plus difficile.",
   plausibilityNote:
     "Le scénario suppose que l'URSS rompe le pacte de 1939 pour attaquer une Allemagne affaiblie, hypothèse discutable compte tenu de l'état de l'Armée rouge après les purges de 1937-1938. La confiance baisse vite après 1942.",
+  impact: {
+    score: 34,
+    verdict: 'Retour vers le réel',
+    summary:
+      "L'échec du putsch ramène l'histoire vers son cours réel : guerre, division de l'Allemagne puis réunification, avec un calendrier décalé de quelques années.",
+    dimensions: {
+      politics: 5,
+      economy: 4,
+      society: 4,
+      culture: 3,
+      geopolitics: 6,
+    },
+  },
 }
