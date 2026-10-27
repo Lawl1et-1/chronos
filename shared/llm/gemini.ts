@@ -50,12 +50,19 @@ export interface GeminiOptions {
   models?: string[]
   /** Free-tier models can queue for minutes when busy: past this, hand over to the next one. */
   timeoutMs?: number
+  /** Send calls through a proxy that adds the real key (the static site's AI proxy). */
+  baseUrl?: string
 }
 
 /** Works both on the server and in the browser (the visitor's own key on the static site). */
-export function geminiProvider({ apiKey, models = DEFAULT_GEMINI_MODELS, timeoutMs = 90_000 }: GeminiOptions): Provider {
+export function geminiProvider({
+  apiKey,
+  models = DEFAULT_GEMINI_MODELS,
+  timeoutMs = 90_000,
+  baseUrl,
+}: GeminiOptions): Provider {
   if (!apiKey) throw new LlmError('Clé API Gemini absente.', 'missing_key', 503)
-  const ai = new GoogleGenAI({ apiKey })
+  const ai = new GoogleGenAI({ apiKey, ...(baseUrl ? { httpOptions: { baseUrl } } : {}) })
 
   const config = (req: JsonRequest, signal: AbortSignal) => ({
     systemInstruction: req.system,

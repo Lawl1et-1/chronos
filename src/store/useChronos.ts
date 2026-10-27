@@ -191,7 +191,7 @@ export const useChronos = create<ChronosState>((set, get) => {
       const { selected, countries, year, keyEvents } = get()
       const country = countries[selected - 1]
       if (!country) return
-      const key = `${country.index}:${year}:${getLang()}:${STATIC_SITE && !get().geminiKey ? 'demo' : 'live'}`
+      const key = `${country.index}:${year}:${getLang()}`
       if (keyEvents.status !== 'idle' && keyEvents.status !== 'error' && keyEvents.key === key) return
 
       inFlight?.abort()

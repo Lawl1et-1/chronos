@@ -150,15 +150,15 @@ en surbrillance dans le shader du globe.
 
 GitHub Pages ne sert que des fichiers statiques : la version en ligne n'a donc pas de serveur.
 
-- **Sans clé**, elle fonctionne en mode démo (Allemagne, 1939).
-- **Avec une clé Gemini gratuite**, saisie par le visiteur (bouton « Mode démo »), l'IA est appelée
-  directement depuis le navigateur, avec les mêmes prompts, la même validation et le même streaming
-  que le serveur. La clé reste dans le navigateur du visiteur et n'est envoyée qu'à Google ;
-  aucune clé n'est intégrée au site.
+- **L'IA passe par un petit proxy** (Cloudflare Worker, dossier `worker/`) qui garde la clé Gemini
+  en secret : les visiteurs n'ont rien à configurer. Le proxy n'accepte que l'adresse du site, les
+  modèles autorisés et les appels de génération. Un navigateur peut aussi utiliser sa propre clé
+  (`Maj + K`), qui ne quitte pas ce navigateur.
 - **Les liens de partage** contiennent le scénario compressé dans l'URL (`#s=…`) au lieu d'être
   stockés sur un serveur.
 
-Le déploiement est automatique à chaque push sur `main` (`.github/workflows/pages.yml`). Pour
+Le déploiement est automatique à chaque push sur `main` (`.github/workflows/pages.yml`). Le proxy se
+déploie à part : `cd worker && npx wrangler deploy`, puis `npx wrangler secret put GEMINI_API_KEY`. Pour
 construire la version statique en local :
 
 ```bash
